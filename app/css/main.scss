@@ -1,2 +1,44 @@
 @import "base/normalize";
 @import "base/typography";
+@import "base/grid";
+
+.submit-btn {}
+
+.results {
+  margin-top: 50px;
+  p {
+    margin: 5px 0 5px 0;
+  }
+  display: none;
+}
+
+.pre-loader {
+  display: block;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+
+.main {
+  position: relative;
+  padding-top: 100px;
+}
+
+.inspiration {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#characters {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 866px;
+  height: 1165px;
+  background-color: rgba(232, 198, 152, 1);
+}

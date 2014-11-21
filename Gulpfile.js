@@ -9,28 +9,12 @@ var gulp = require('gulp'),
   rimraf = require('gulp-rimraf'),
   autoprefixer = require('gulp-autoprefixer');
 
-// Modules for webserver and livereload
-var express = require('express'),
-  refresh = require('gulp-livereload'),
-  livereload = require('connect-livereload'),
-  livereloadport = 35729,
-  serverport = 5000;
+var appServer = require('./api/server');
 
-// Set up an express server (not starting it yet)
-var server = express();
-// Add live reload
-server.use(livereload({
-  port: livereloadport
-}));
-
-// Use our 'dist' folder as rootfolder
-server.use(express.static('./dist'));
-// Because I like HTML5 pushstate .. this redirects everything back to our index.html
-server.all('/*', function(req, res) {
-  res.sendfile('index.html', {
-    root: 'dist'
-  });
-});
+var server = appServer.server,
+  refresh = appServer.refresh,
+  livereloadport = appServer.livereloadport,
+  serverport = appServer.serverport;
 
 // Clean task
 gulp.task('clean', function(cb) {

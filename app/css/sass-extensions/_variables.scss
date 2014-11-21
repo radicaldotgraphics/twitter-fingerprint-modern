@@ -1,0 +1,65 @@
+//
+// Variables & Maps
+// --------------------------------------------------
+//
+
+$breakpoints: (
+  xs: 0px,
+  sm: 760px,
+  md: 1016px,
+  lg: 1400px
+);
+
+$base-pixel-size: 16;
+
+$font-families: ();
+
+$colors : ();
+
+$ease: (
+  default: ease,
+  out: ease-out,
+  in: ease-in,
+  inQuart: cubic-bezier(0.895, 0.030, 0.685, 0.220),
+  inExpo: cubic-bezier(0.950, 0.050, 0.795, 0.035),
+  outQuart: cubic-bezier(0.165, 0.840, 0.440, 1.000),
+  outExpo: cubic-bezier(0.190, 1.000, 0.220, 1.000)
+);
+
+// Box shadows
+$shadows: ();
+
+$zIndex: ();
+
+// Number of columns in the grid.
+$grid-columns: 12;
+
+// Padding between columns. Gets divided in half for the left and right.
+$grid-gutter-width: 8px;
+$grid-max-width: 1144px;
+$grid-container: 'container';
+$grid-row: 'row';
+$grid-prefix: 'col';
+$grid-margin-bottom-name: 'module';
+$grid-sizes: (xs, sm, md, lg);
+$grid-ratio-name: 'aspect';
+$grid-ratio-inner-name: 'aspect-inner';
+
+$grid-ratios: (
+  '16x9': (16, 9),
+  '9x16': (9, 16),
+  '4x3': (4, 3),
+  '3x4': (3, 4),
+  '3x2': (3, 2),
+  '2x3': (2, 3),
+  '1x1': (1, 1)
+);
+$grid-container-padding: (
+  xs: 3.25%,
+  sm: 3.25%,
+  md: 3.5%,
+  lg: 3.5%
+);
+$grid-max-container-padding: (strip-units(map-get($grid-container-padding, "lg")) / 100) * map-get($breakpoints, "lg");
+
+$media-object-margin: $grid-gutter-width;

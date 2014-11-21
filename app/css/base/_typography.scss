@@ -1,0 +1,36 @@
+html {
+  /*   background: url("/img/body-bg.jpg") no-repeat center center fixed;
+    background-size: cover; */
+  background-color: #000000;
+}
+
+body {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+  padding-bottom: 100px;
+}
+
+a {
+  color: rgb(20, 198, 255);
+}
+
+a:active,
+a:hover,
+a:visited {
+  color: rgb(223, 44, 139);
+}
+
+p {
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.4px;
+}
+
+p,
+h1,
+h2,
+h3 {
+  color: white;
+  font-weight: inherit;
+}
