@@ -4,262 +4,311 @@
 require('../js/vendor/ba-linkify.min.js');
 require('../js/vendor/easeljs-0.7.1.min.js');
 
-var $ = require('jquery');
+var $ = require('jquery'),
+  ENTER_BUTTON_KEY = 13,
+  currentCount = {},
+  charCounts = {},
+  markers = [],
+  currentDataSet = charCounts;
 
-var ENTER_BUTTON_KEY = 13;
+// Artboard
+var artBoard = {
+  /**
+   * Setup artboard
+   */
+  init: function() {
+    this.stage = new createjs.Stage('artboard');
 
-var charStage = new createjs.Stage('characters');
+    this.drawConfig = {
+      circleRadius: 370,
+      centerx: 433,
+      centery: 457,
+      lineStrokeColor: '#747249'
+    };
 
-var charStageBG = new createjs.Shape();
+    this.fillBackground();
 
-charStageBG.graphics.beginLinearGradientFill(['#e9c79a', '#84d3a4'], [0.35, 1], 0, 483, 866, 383);
+  },
 
-charStageBG.graphics.dr(0, 0, 866, 1165);
+  /**
+   * Performs drawing methods on the stage
+   */
+  render: function() {
+    // Add heat map
+    this.stage.removeAllChildren();
+    this.fillBackground();
+    this.drawHeatMap();
+    this.drawCenterFill();
+    this.drawCircularLines(currentDataSet);
+  },
 
-charStage.addChild(charStageBG);
+  /**
+   * Draws through the points in the data set creating a polygon filled shape
+   */
+  drawHeatMap: function() {
 
-function formatDate(str) {
-  var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  var date = new Date(str),
-    dateStr = '',
-    hours = date.getHours(),
-    minutes = date.getMinutes();
-
-  dateStr += months[date.getMonth()];
-  dateStr += ' ' + date.getDate() + ', ';
-  dateStr += date.getFullYear() + ' ';
-  var hoursCalc = (hours > 12 ? hours - 12 : hours);
-  var hoursAdj = hoursCalc === 0 ? 12 : hoursCalc;
-  dateStr += hoursAdj + ':' + (minutes < 10 ? '0' + minutes : minutes) + (hours >= 12 ? 'pm' : 'am');
-  return dateStr;
-
-}
-
-function getHours(dateStr) {
-  return ((new Date(dateStr)).getHours() + 1).toString();
-}
-
-function getCharCount(tweet) {
-  return tweet.length.toString();
-}
-
-var currentCount = {};
-var charCounts = {};
-
-function handleSubmit() {
-  var p = $.getJSON('http://localhost:5000/api/timeline?screen_name=' + /*$('.user-input').val()*/ 'tylermadison');
-
-  // Clear previous results if any
-  $('.results').empty();
-
-  $('.pre-loader').css('opacity', 1);
-
-  p.then(function(data) {
-    $('.pre-loader').css('opacity', 0);
-    console.log('we aint afraid of no ghost', data);
-
-    $.each(data.tweets, function(i, tweet) {
-      var date = new Date(tweet.created_at);
-      var dateStr =
-        $('<p> - ' + window.linkify(tweet.text) + ' on ' + formatDate(tweet.created_at) + '</p>').appendTo($('.results'));
-
-      // For time of day
-      if (currentCount[getHours(tweet.created_at)] === undefined) {
-        currentCount[getHours(tweet.created_at)] = 1;
-
-      } else {
-        currentCount[getHours(tweet.created_at)] ++;
-      }
-
-      // For character counts
-      if (charCounts[getCharCount(tweet.text)] === undefined) {
-        charCounts[getCharCount(tweet.text)] = 1;
-      } else {
-        charCounts[getCharCount(tweet.text)] ++;
-      }
-
-    });
-
-    // Fill in blanks
-    for (var i = 1; i <= 24; i++) {
-      if (!currentCount[i]) {
-        currentCount[i] = 0;
-      }
-    }
-
-    // Fill in blanks
-    for (var i = 1; i <= 140; i++) {
-      if (!charCounts[i]) {
-        charCounts[i] = 0;
-      }
-    }
-
-    // Fugly results
-    /*    $('<h1>Volume:</h1>').appendTo($('.results'));
-
-        for (var hour in currentCount) {
-          var volumePerHour = currentCount[hour];
-
-          $('<p>' + 'Volume During ' + hour + '=> ' + volumePerHour + '</p>').appendTo($('.results'));
-        }
-
-        $('<h1>Characters:</h1>').appendTo($('.results'));
-
-        for (var characters in charCounts) {
-          var charAmt = charCounts[characters];
-
-          $('<p>' + 'Volume of Amount of Characters ' + characters + '=> ' + charAmt + '</p>').appendTo($('.results'));
-        }*/
-
-    $('#characters, .inspiration').show();
-
-    // Easle stuff
-    var numberOfPoints = 24,
-      angleIncrement = (360 / numberOfPoints),
-      circleRadius = 370,
-      centerx = 433,
-      centery = 457;
-
-    var strokeColor = '#747249';
+    var numberOfPoints = Object.keys(currentDataSet).length,
+      angleIncrement = (360 / numberOfPoints);
 
     var centerCircleBG = new createjs.Shape();
-    centerCircleBG.graphics.beginFill('#e9e6b1').drawCircle(centerx, centery, circleRadius - 30);
-    charStage.addChild(centerCircleBG);
+    centerCircleBG.graphics.beginFill('#e9e6b1').drawCircle(this.drawConfig.centerx, this.drawConfig.centery, this.drawConfig.circleRadius - 30);
+    this.stage.addChild(centerCircleBG);
 
     var heatMap = new createjs.Shape();
-
-    /*    var grd = document.get.createLinearGradient(0, 0, 170, 0);
-        grd.addColorStop(0, "black");
-        grd.addColorStop(1, "white");
-
-        ctx.fillStyle = grd;*/
-
-    //heatMap.graphics.beginFill('#d8be45');
     heatMap.graphics.beginLinearGradientFill(['#ddd43b', '#d28044', '#ce4c4c'], [0, 0.5, 1], 100, 100, 0, 600);
-    //heatMap.graphics.beginStroke('#ff0000');
-    var i = 0;
 
-    var startX = -1;
-    var startY = -1;
+    var i = 0,
+      startX = -1,
+      startY = -1,
+      lastX = -1,
+      lastY = -1,
+      mult = this.getPXMult(currentDataSet),
+      minOffset = 140; // Inner circle
 
-    var lastX = -1;
-    var lastY = -1;
+    console.log('Using Multiplyer :: ', mult);
 
-    for (var count in currentCount) {
+    for (var count in currentDataSet) {
       var time = count,
-        amount = currentCount[count];
+        amount = currentDataSet[count];
 
-      var xxx = ((15 * amount) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180)));
-      var yyy = ((15 * amount) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
-
-      i++;
+      var currX = ((mult * amount + minOffset) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
+        currY = ((mult * amount + minOffset) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
 
       if (startX === -1 && startY === -1) {
-        startX = centerx + xxx;
-        startY = centery + yyy;
+        startX = this.drawConfig.centerx + currX;
+        startY = this.drawConfig.centery + currY;
       }
 
       // Next point to draw to
-      var nextXxx = ((15 * amount) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180)));
-      var nextYyy = ((15 * amount) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
+      var nextX = ((mult * amount + minOffset) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
+        nextY = ((mult * amount + minOffset) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
 
-      if (i === Object.keys(currentCount).length) {
+      if (i === numberOfPoints) {
         heatMap.graphics.lt(startX, startY); // Gets back to home to fill
       } else {
-        if (i === 1) {
-          heatMap.graphics.mt(centerx + xxx, centery + yyy).lt(centerx + nextXxx, centery + nextYyy);
-          lastX = centerx + nextXxx;
-          lastY = centery + nextYyy;
-        } else {
-          heatMap.graphics.lt(centerx + nextXxx, centery + nextYyy);
-          lastX = centerx + nextXxx;
-          lastY = centery + nextYyy;
-        }
+        if (i === 0) {
+          heatMap.graphics.mt(this.drawConfig.centerx + currX, this.drawConfig.centery + currY).lt(this.drawConfig.centerx + nextX, this.drawConfig.centery + nextY);
 
-        //console.log(i, 'Drawing from:', centerx + xxx, centery + yyy, ' => ', centerx + nextXxx, centery + nextYyy);
+          lastX = this.drawConfig.centerx + nextX;
+          lastY = this.drawConfig.centery + nextY;
+
+          artBoard.markPoint(this.drawConfig.centerx + currX, this.drawConfig.centery + currY, true);
+
+        } else {
+          heatMap.graphics.lt(this.drawConfig.centerx + nextX, this.drawConfig.centery + nextY);
+          lastX = this.drawConfig.centerx + nextX;
+          lastY = this.drawConfig.centery + nextY;
+        }
+        artBoard.markPoint(this.drawConfig.centerx + nextX, this.drawConfig.centery + nextY);
       }
+
+      i++;
 
       console.log(time, amount);
     }
 
-    charStage.addChild(heatMap);
+    this.stage.addChild(heatMap);
 
+    // Add point markers
+    for (var j = 0; j < markers.length; j++) {
+      this.stage.addChild(markers[j]);
+    }
+
+    this.stage.update();
+  },
+
+  /**
+   * Places a dot at the x,y coordinate provided
+   * @param  {Number} x     horizontal coordinate of point
+   * @param  {Number} y     vertical coordinate of point
+   * @param  {Boolean} first if true will change color to red indicating the first point
+   */
+  markPoint: function(x, y, first) {
+    var spot = new createjs.Shape();
+    spot.graphics.beginFill(first ? '#ff0000' : '#1e1e1e');
+    spot.graphics.arc(x, y, 1, 0, 2 * Math.PI, false);
+    markers.push(spot);
+  },
+
+  /**
+   * Draws background gradient
+   */
+  fillBackground: function() {
+    var bg = new createjs.Shape();
+    bg.graphics.beginLinearGradientFill(['#e9c79a', '#84d3a4'], [0.35, 1], 0, 483, 866, 383);
+    bg.graphics.dr(0, 0, 1732, 2330);
+    this.stage.addChild(bg);
+
+    this.stage.update();
+  },
+
+  /**
+   * Draws center circle(s) and acts as a mask on top of the heatmap
+   */
+  drawCenterFill: function() {
     var centerCircle = new createjs.Shape();
-
-    /*    centerCircle.graphics.beginFill('#e9e6b1');
-        centerCircle.graphics.arc(centerx, centery, circleRadius - 250, 0, 2 * Math.PI, false);*/
+    centerCircle.alpha = 1;
+    centerCircle.graphics.beginFill('#e9e6b1');
+    centerCircle.graphics.arc(this.drawConfig.centerx, this.drawConfig.centery, this.drawConfig.circleRadius - 250, 0, 2 * Math.PI, false);
 
     centerCircle.graphics.setStrokeStyle(0.25, 'round');
-    centerCircle.graphics.beginStroke(strokeColor);
-    centerCircle.graphics.arc(centerx, centery, circleRadius - 275, 0, 2 * Math.PI, false);
+    centerCircle.graphics.beginStroke(this.drawConfig.lineStrokeColor);
+    centerCircle.graphics.arc(this.drawConfig.centerx, this.drawConfig.centery, this.drawConfig.circleRadius - 270, 0, 2 * Math.PI, false);
     centerCircle.graphics.endStroke();
 
-    charStage.addChild(centerCircle);
+    this.stage.addChild(centerCircle);
 
     var centerCircleOuter = new createjs.Shape();
     centerCircleOuter.graphics.setStrokeStyle(0.25, 'round');
-    centerCircleOuter.graphics.beginStroke(strokeColor);
-    centerCircleOuter.graphics.arc(centerx, centery, circleRadius - 100, 0, 2 * Math.PI, false);
+    centerCircleOuter.graphics.beginStroke(this.drawConfig.lineStrokeColor);
+    centerCircleOuter.graphics.arc(this.drawConfig.centerx, this.drawConfig.centery, this.drawConfig.circleRadius - 100, 0, 2 * Math.PI, false);
 
     centerCircleOuter.graphics.endStroke();
-    charStage.addChild(centerCircleOuter);
+    this.stage.addChild(centerCircleOuter);
 
-    for (var i = 0; i < numberOfPoints; i++) {
+    this.stage.update();
+  },
 
-      var cont = new createjs.Container();
+  // Pixel multipler normalization
+  getPXMult: function(obj) {
+    var max = -1;
+    for (var val in obj) {
+      if (obj[val] > max) {
+        max = obj[val];
+      }
+    }
+    console.log('max =>', max);
+    return 200 / max; // This 200 should be a calculation not a hardcoded number...
+  },
+
+  /**
+   * Draws lines beneath the heatmap
+   * @param  {Object} dataSet the current data has been chosen
+   */
+  drawCircularLines: function(dataSet) {
+
+    var numPoints = Object.keys(dataSet).length,
+      angleIncrement = 360 / numPoints;
+
+    for (var i = 0; i < numPoints; i++) {
+
+      var container = new createjs.Container();
 
       var shape = new createjs.Shape();
 
-      cont.addChild(shape);
+      container.addChild(shape);
 
-      var xx = (circleRadius * Math.cos((angleIncrement * i - 90) * (Math.PI / 180)));
-      var xxx = ((circleRadius * 0.95) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180)));
-      var yy = (circleRadius * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
-      var yyy = ((circleRadius * 0.95) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
-      var rad = Math.atan2(yy, xx);
-      var deg = rad * (180 / Math.PI);
+      var xx = (this.drawConfig.circleRadius * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
+        xxx = ((this.drawConfig.circleRadius * 0.95) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
+        yy = (this.drawConfig.circleRadius * Math.sin((angleIncrement * i - 90) * (Math.PI / 180))),
+        yyy = ((this.drawConfig.circleRadius * 0.95) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180))),
+        rad = Math.atan2(yy, xx),
+        deg = rad * (180 / Math.PI);
 
-      cont.x = xx + centerx;
-      cont.y = yy + centery;
+      container.x = xx + this.drawConfig.centerx;
+      container.y = yy + this.drawConfig.centery;
+      container.rotation = deg;
 
-      var tf = new createjs.Text(i + 1, '12px Arial', '#555452');
+      var tf = new createjs.Text(i + 1, '9px Arial', '#555452');
       tf.rotation = 90;
       tf.textAlign = 'center';
-      tf.visible = false;
-      cont.addChild(tf);
+
+      container.addChild(tf);
 
       var line = new createjs.Shape();
       line.graphics.setStrokeStyle(0.25, 'round');
-      line.graphics.beginStroke(strokeColor);
-      line.graphics.mt(centerx + ((circleRadius - 250) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))), centery + ((circleRadius - 250) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)))).lt(centerx + xxx, centery + yyy);
+      line.graphics.beginStroke(this.drawConfig.lineStrokeColor);
+      line.graphics.mt(this.drawConfig.centerx + ((this.drawConfig.circleRadius - 250) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))), this.drawConfig.centery + ((this.drawConfig.circleRadius - 250) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)))).lt(this.drawConfig.centerx + xxx, this.drawConfig.centery + yyy);
       line.graphics.endStroke();
-      charStage.addChild(line);
+      this.stage.addChild(line);
 
-      var len = currentCount[i];
-
-      if (isNaN(len)) {
-        len = 0;
-      }
-
-      cont.rotation = deg;
-
-      if (len != 0) {
-        shape.graphics.drawRect(0, 0, len * 20, 2);
-        tf.visible = true;
-
-      } else {
-        tf.visible = true;
-        tf.alpha = 0.4;
-      }
-
-      charStage.addChild(cont);
+      this.stage.addChild(container);
     }
 
-    charStage.update();
+    this.stage.update();
+  }
 
+}
+
+// Formatting utils etc
+var utils = {
+  formatDate: function(str) {
+    var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    var date = new Date(str),
+      dateStr = '',
+      hours = date.getHours(),
+      minutes = date.getMinutes();
+
+    dateStr += months[date.getMonth()];
+    dateStr += ' ' + date.getDate() + ', ';
+    dateStr += date.getFullYear() + ' ';
+    var hoursCalc = (hours > 12 ? hours - 12 : hours);
+    var hoursAdj = hoursCalc === 0 ? 12 : hoursCalc;
+    dateStr += hoursAdj + ':' + (minutes < 10 ? '0' + minutes : minutes) + (hours >= 12 ? 'pm' : 'am');
+    return dateStr;
+  },
+
+  getHours: function(dateStr) {
+    return ((new Date(dateStr)).getHours() + 1).toString();
+  },
+
+  getCharCount: function(tweet) {
+    return tweet.length.toString();
+  }
+
+}
+
+function parseTweets(data) {
+  $.each(data.tweets, function(i, tweet) {
+    var date = new Date(tweet.created_at);
+    var dateStr =
+      $('<p> - ' + window.linkify(tweet.text) + ' on ' + utils.formatDate(tweet.created_at) + '</p>').appendTo($('.results'));
+
+    // For time of day
+    if (currentCount[utils.getHours(tweet.created_at)] === undefined) {
+      currentCount[utils.getHours(tweet.created_at)] = 0;
+
+    } else {
+      currentCount[utils.getHours(tweet.created_at)] ++;
+    }
+
+    // For character counts
+    if (charCounts[utils.getCharCount(tweet.text)] === undefined) {
+      charCounts[utils.getCharCount(tweet.text)] = 1;
+    } else {
+      charCounts[utils.getCharCount(tweet.text)] ++;
+    }
+
+  });
+
+  // Fill in blanks
+  for (var i = 1; i <= 24; i++) {
+    if (!currentCount[i]) {
+      currentCount[i] = 0;
+    }
+  }
+
+  // Fill in blanks
+  for (var i = 1; i <= Object.keys(charCounts).length; i++) {
+    if (!charCounts[i]) {
+      charCounts[i] = 0;
+    }
+  }
+}
+
+function handleSubmit() {
+  var p = $.getJSON('http://localhost:5000/api/timeline?screen_name=' + $('.user-input').val());
+
+  // Clear previous results if any
+  //$('.results').empty();
+
+  p.then(function(data) {
+    parseTweets(data);
+    artBoard.render();
   });
 }
 
+// FPO
 $('.submit-btn').on('click', handleSubmit.bind(this));
 
 $(document).on('keyup', function(e) {
@@ -268,152 +317,11 @@ $(document).on('keyup', function(e) {
     if ($('.user-input').val().length > 0) {
       handleSubmit();
     }
-
   }
 });
-
-$('#characters, .inspiration').hide();
 
 // REMOVE THIS
 $(function() {
+  artBoard.init();
   handleSubmit();
 });
-
-/*for (var i = 0; i < numberOfPoints; i++) {
-
-  var c: Sprite = new Sprite();
-
-  var xx = (circleRadius * Math.cos((angleIncrement * i - 90) * (Math.PI / 180)));
-  var yy = (circleRadius * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
-  //
-  var rad = Math.atan2(yy, xx);
-  var deg = rad * (180 / Math.PI);
-
-  var tf: MovieClip = new TextLabel();
-  c.addChild(tf);
-
-  tf.rotation = 90;
-  tf.visible = false;
-  tf.title_txt.text = String(i + 1);
-
-  c.addChild(tf);
-
-  c.x = xx + centerx;
-  c.y = yy + centery;
-  c.graphics.beginFill(0x000000, .5);
-
-  var len = countArr[i];
-  if (isNaN(len)) {
-    len = 0;
-  }
-
-  c.rotation = deg;
-  if (len != 0) {
-    c.graphics.drawRect(0, 0, len * 20, 2);
-
-    tf.visible = true;
-  } else {
-    tf.visible = true;
-    tf.alpha = .2;
-  }
-  addChild(c);
-}*/
-
-/*console.log(stage);
-var circle = new createjs.Shape();*/
-
-// Draw circle like this or
-/*circle.graphics.beginFill("red").drawCircle(0, 0, 50);
-circle.x = 100;
-circle.y = 100;
-stage.addChild(circle);*/
-
-// Or
-/*stage.addChild(new createjs.Shape()).setTransform(100, 100).graphics.f('red').dc(0, 0, 50);
-stage.addChild(circle);
-
-var text = new createjs.Text('Hello World', '20px Arial', '#ff7700');
-text.x = 100;
-text.rotation = 40;
-stage.addChild(text);*/
-
-/////////
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
-///
