@@ -8,8 +8,7 @@ var $ = require('jquery'),
   ENTER_BUTTON_KEY = 13,
   currentCount = {},
   charCounts = {},
-  markers = [],
-  currentDataSet = charCounts;
+  markers = [];
 
 // Artboard
 var artBoard = {
@@ -33,21 +32,32 @@ var artBoard = {
   /**
    * Performs drawing methods on the stage
    */
-  render: function() {
+  render: function(currData) {
     // Add heat map
     this.stage.removeAllChildren();
+    this.stage.clear();
+    this.stage.update();
+
     this.fillBackground();
-    this.drawHeatMap();
+    this.drawHeatMap(currData);
     this.drawCenterFill();
-    this.drawCircularLines(currentDataSet);
+    this.drawCircularLines(currData);
   },
+
+  reset: function(){
+    this.stage.removeAllChildren();
+    this.stage.clear();
+    this.stage.update();
+    this.fillBackground();
+  },
+
 
   /**
    * Draws through the points in the data set creating a polygon filled shape
    */
-  drawHeatMap: function() {
+  drawHeatMap: function(dataSet) {
 
-    var numberOfPoints = Object.keys(currentDataSet).length,
+    var numberOfPoints = Object.keys(dataSet).length,
       angleIncrement = (360 / numberOfPoints);
 
     var centerCircleBG = new createjs.Shape();
@@ -62,16 +72,14 @@ var artBoard = {
       startY = -1,
       lastX = -1,
       lastY = -1,
-      mult = this.getPXMult(currentDataSet),
+      mult = this.getPXMult(dataSet),
       minOffset = 140; // Inner circle
 
     console.log('Using Multiplyer :: ', mult);
 
-    for (var count in currentDataSet) {
-      var time = count,
-        amount = currentDataSet[count];
-
-      var currX = ((mult * amount + minOffset) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
+    for (var count in dataSet) {
+      var amount = dataSet[count],
+        currX = ((mult * amount + minOffset) * Math.cos((angleIncrement * i - 90) * (Math.PI / 180))),
         currY = ((mult * amount + minOffset) * Math.sin((angleIncrement * i - 90) * (Math.PI / 180)));
 
       if (startX === -1 && startY === -1) {
@@ -104,7 +112,7 @@ var artBoard = {
 
       i++;
 
-      console.log(time, amount);
+      console.log(count, amount);
     }
 
     this.stage.addChild(heatMap);
@@ -259,10 +267,15 @@ var utils = {
 }
 
 function parseTweets(data) {
+
+  currentCount = {};
+  charCounts = {};
+  markers = [];
+
   $.each(data.tweets, function(i, tweet) {
     var date = new Date(tweet.created_at);
-    var dateStr =
-      $('<p> - ' + window.linkify(tweet.text) + ' on ' + utils.formatDate(tweet.created_at) + '</p>').appendTo($('.results'));
+    /*    var dateStr =
+          $('<p> - ' + window.linkify(tweet.text) + ' on ' + utils.formatDate(tweet.created_at) + '</p>').appendTo($('.results'));*/
 
     // For time of day
     if (currentCount[utils.getHours(tweet.created_at)] === undefined) {
@@ -297,14 +310,17 @@ function parseTweets(data) {
 }
 
 function handleSubmit() {
+
   var p = $.getJSON('http://localhost:5000/api/timeline?screen_name=' + $('.user-input').val());
 
   // Clear previous results if any
   //$('.results').empty();
+  //
+  artBoard.reset();
 
   p.then(function(data) {
     parseTweets(data);
-    artBoard.render();
+    artBoard.render(charCounts);
   });
 }
 
@@ -323,5 +339,4 @@ $(document).on('keyup', function(e) {
 // REMOVE THIS
 $(function() {
   artBoard.init();
-  handleSubmit();
 });
