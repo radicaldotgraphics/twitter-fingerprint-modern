@@ -8,7 +8,10 @@ var $ = require('jquery'),
   ENTER_BUTTON_KEY = 13,
   currentCount = {},
   charCounts = {},
-  markers = [];
+  markers = [],
+  dataSets = [charCounts, currentCount],
+  dataIndex = 0,
+  currDataSet = dataSets[dataIndex];
 
 // Artboard
 var artBoard = {
@@ -33,6 +36,9 @@ var artBoard = {
    * Performs drawing methods on the stage
    */
   render: function(currData) {
+
+    console.log('rendering artboard with::', currData);
+
     // Add heat map
     this.stage.removeAllChildren();
     this.stage.clear();
@@ -44,18 +50,19 @@ var artBoard = {
     this.drawCircularLines(currData);
   },
 
-  reset: function(){
+  reset: function() {
     this.stage.removeAllChildren();
     this.stage.clear();
     this.stage.update();
     this.fillBackground();
   },
 
-
   /**
    * Draws through the points in the data set creating a polygon filled shape
    */
   drawHeatMap: function(dataSet) {
+
+
 
     var numberOfPoints = Object.keys(dataSet).length,
       angleIncrement = (360 / numberOfPoints);
@@ -271,6 +278,8 @@ function parseTweets(data) {
   currentCount = {};
   charCounts = {};
   markers = [];
+  dataSets = [charCounts, currentCount];
+  currDataSet = dataSets[dataIndex];
 
   $.each(data.tweets, function(i, tweet) {
     var date = new Date(tweet.created_at);
@@ -320,12 +329,21 @@ function handleSubmit() {
 
   p.then(function(data) {
     parseTweets(data);
-    artBoard.render(charCounts);
+    artBoard.render(currDataSet);
   });
 }
 
 // FPO
 $('.submit-btn').on('click', handleSubmit.bind(this));
+
+$('#characters, #time').on('click', function() {
+  console.log('clicked radio', $(this)[0].value - 1);
+  dataIndex = $(this)[0].value - 1;
+  currDataSet = dataSets[dataIndex];
+  if ($('.user-input').val().length > 0) {
+    handleSubmit();
+  }
+});
 
 $(document).on('keyup', function(e) {
 
