@@ -54,7 +54,7 @@ gulp.task('css', function() {
 // Browserify task
 gulp.task('browserify', function() {
   // Single point of entry (make sure not to src ALL your files, browserify will figure it out)
-  gulp.src('app/js/main.js')
+  gulp.src(['app/js/main.js', '!app/js/main_old.js'])
     .pipe(browserify({
       insertGlobals: true,
       debug: false

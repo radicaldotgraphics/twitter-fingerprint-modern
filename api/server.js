@@ -28,10 +28,9 @@ server.get('/api/timeline', function(req, res, next) {
   if (req.query.screen_name && req.query.screen_name.length) {
     console.log('Twitter User @:', req.query.screen_name);
     var twt = new Twitter.Twitter(twitterConfig);
-
     twt.getUserTimeline({
       screen_name: req.query.screen_name,
-      count: 200
+      count: 200 //TODO: Paginate these results to get all 3200
     }, function() {}, function(data) {
       res.json({
         tweets: JSON.parse(data)
