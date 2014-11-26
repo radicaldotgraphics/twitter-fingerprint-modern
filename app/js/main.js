@@ -34,7 +34,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
 
   var i = 0,
     mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
-    minOffset = 45;
+    minOffset = 41;
 
   ctx.clearRect(0, 0, 500, 650);
 
@@ -54,12 +54,22 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
     i++;
   }
   ctx.stroke();
-
+  ctx.closePath();
   // Fill center
-  ctx.fillStyle = 'rgba(39, 54, 63, 1)';
-  ctx.moveTo(drawConfig.centerX, drawConfig.centerY);
-  ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI);
+  /*  ctx.fillStyle = 'rgba(39, 54, 63, 1)';
+    ctx.moveTo(drawConfig.centerX, drawConfig.centerY);
+    ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI);
+    ctx.fill();*/
+
+  // Mask the inside
+  ctx.beginPath();
+  ctx.globalCompositeOperation = 'destination-out'
+  ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI, true);
   ctx.fill();
+  ctx.closePath();
+
+  // Restore composite mode
+  ctx.globalCompositeOperation = 'source-over';
 
   i = 0;
   ctx.font = '8pt HelveticaNeue-Light';
@@ -68,20 +78,20 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
   ctx.textAlign = 'center';
   ctx.lineWidth = 1;
 
+  ctx.beginPath();
   // Draw tick marks around circumference
   //
   if (renderOutlines) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
       var circRadius = 222,
+        angleStep = (angleIncrement * i - 88),
         xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
         yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
         xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
         yyy = drawConfig.centerY + (circRadius + 10) * Math.sin(angleStep * rad),
         textX = drawConfig.centerX + (circRadius + 20) * Math.cos(angleStep * rad),
         textY = drawConfig.centerY + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
-
-      angleStep = (angleIncrement * i - 88);
 
       // Place times ever 10th character
       if (i % 10 == 9) {
@@ -95,6 +105,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
       ctx.lineTo(xxx, yyy);
       ctx.stroke();
     }
+    ctx.closePath();
 
     /*    ctx.font = '9pt HelveticaNeue-Light';
         ctx.fillStyle = '#ffffff';
@@ -190,16 +201,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   }
 
   ctx.closePath();
-  ctx.fillStyle = 'rgba(0, 173, 239, 0.5)';
+  ctx.fillStyle = 'rgba(0, 173, 239, 0.25)';
   ctx.fill();
-
-  // Fill center
-  /*  ctx.beginPath();
-    ctx.fillStyle = 'rgba(39, 54, 63, 1)';
-    ctx.moveTo(drawConfig.centerX, drawConfig.centerY);
-    ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.fill();*/
 
   // Draw tick marks around circumference
   if (renderOutlines) {
