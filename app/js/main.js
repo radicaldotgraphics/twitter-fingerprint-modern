@@ -38,7 +38,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
 
   ctx.clearRect(0, 0, 500, 650);
 
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.25;
   ctx.strokeStyle = '#EC0972';
   ctx.beginPath();
 
@@ -189,7 +189,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   }
 
   ctx.closePath();
-  ctx.fillStyle = 'rgba(0, 173, 239, 0.25)';
+  ctx.fillStyle = 'rgb(25, 88, 114)';
   ctx.fill();
 
   // Draw tick marks around circumference
@@ -288,7 +288,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.closePath();
 
-  ctx.fillStyle = 'rgba(0, 173, 239, 0.2)';
+  ctx.fillStyle = 'rgb(29, 60, 74)';
   ctx.fill();
 
   ctx.fillStyle = '#76787A';
