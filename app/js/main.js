@@ -219,15 +219,6 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       ctx.lineTo(xxx, yyy);
       ctx.stroke();
     }
-    /*    ctx.font = '9pt HelveticaNeue-Light';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.fillText('Graph B: time of day', 250, 630);
-
-        ctx.font = '14pt HelveticaNeue-Light';
-        ctx.fillStyle = '#76787A';
-        ctx.textAlign = 'left';
-        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);*/
   }
 
   drawTrianlgeMarker(highestPoint, ctx);
@@ -317,7 +308,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
       ctx.textAlign = 'center';
 
-      if (i < 26 || i > 33 && i < 44) {
+      if (i < 26 || i > 33 && i < 44 || i > 28 && i < 30) {
         ctx.fillStyle = '#ffffff';
       } else {
         ctx.fillStyle = '#76787A';
