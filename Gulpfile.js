@@ -29,7 +29,7 @@ gulp.task('html', function() {
 
 // JSHint task
 gulp.task('lint', function() {
-  gulp.src(['app/js/*.js', '!app/js/vendor/*.js'])
+  gulp.src(['app/js/*.js', '!app/js/vendor/*.js', '!app/js/main_old.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });

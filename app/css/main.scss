@@ -41,10 +41,11 @@
   background-color: rgba(39, 54, 63, 1);
 }
 
-#charater-counts,
+#character-counts,
 #time-of-day,
 #most-used,
-#most-used-markers {
+#most-used-markers,
+#background {
   position: relative;
   display: inline-block;
   float: left;
@@ -52,18 +53,18 @@
   padding: 0;
   width: 500px;
   height: 650px;
-  background-color: rgba(39, 54, 63, 1);
   z-index: 0;
   &.merged {
     position: absolute;
   }
 }
 
-#charater-counts {
+#background {
+  background-color: rgba(39, 54, 63, 1);
+}
+
+#character-counts {
   z-index: 2;
-  &.merged {
-    background-color: transparent;
-  }
 }
 
 #most-used-markers {
@@ -77,9 +78,6 @@
 
 #time-of-day {
   z-index: 1;
-  &.merged {
-    background-color: transparent;
-  }
 }
 
 body {
@@ -89,10 +87,11 @@ body {
 }
 
 @media (max-width: 500px) {
-  #charater-counts,
+  #character-counts,
   #time-of-day,
   #most-used,
-  #most-used-markers {
+  #most-used-markers,
+  #background {
     width: 100%;
     height: auto;
   }

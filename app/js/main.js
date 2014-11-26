@@ -22,39 +22,10 @@ var drawConfig = {
 // When data parses store in hash
 var models = {};
 
-var DatGUIConfig = function() {
-  this.showMerged = false;
-}
-
 var Point = function(x, y) {
   this.x = x || 0;
   this.y = y || 0;
-}
-
-function setupGUI() {
-  var config = new DatGUIConfig(),
-    datGUI = new dat.GUI();
-  (datGUI.add(config, 'showMerged')).onChange(function(newVal) {
-    renderCharCountChart(document.getElementById('charater-counts').getContext('2d'), models.charCount, !newVal);
-    renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, !newVal);
-    renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, !newVal);
-
-    $('#charater-counts, #time-of-day, #most-used, #most-used-markers').toggleClass('merged')
-
-    if (newVal === true) {
-      var ctx = document.getElementById('most-used').getContext('2d');
-      ctx.font = '14pt HelveticaNeue-Light';
-      ctx.fillStyle = '#76787A';
-      ctx.textAlign = 'left';
-      ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
-      ctx.font = '9pt HelveticaNeue-Light';
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'center';
-      ctx.fillText('Layering of all three - looks pretty cool, just sayin.', 250, 630);
-    }
-
-  });
-}
+};
 
 function renderCharCountChart(ctx, dataObj, renderOutlines) {
   var numPoints = Object.keys(dataObj).length,
@@ -103,13 +74,15 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
       var circRadius = 222,
-        angleStep = (angleIncrement * i - 88),
         xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
         yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
         xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
         yyy = drawConfig.centerY + (circRadius + 10) * Math.sin(angleStep * rad),
         textX = drawConfig.centerX + (circRadius + 20) * Math.cos(angleStep * rad),
         textY = drawConfig.centerY + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
+
+      angleStep = (angleIncrement * i - 88);
+
       // Place times ever 10th character
       if (i % 10 == 9) {
         ctx.fillText(i + 1, textX, textY);
@@ -123,17 +96,17 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
       ctx.stroke();
     }
 
-    ctx.font = '9pt HelveticaNeue-Light';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('Graph A: character count within a tweet', 250, 630);
+    /*    ctx.font = '9pt HelveticaNeue-Light';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText('Graph A: character count within a tweet', 250, 630);
 
-    // Filltext user name
-    var ctx = document.getElementById('charater-counts').getContext('2d');
-    ctx.font = '14pt HelveticaNeue-Light';
-    ctx.fillStyle = '#76787A';
-    ctx.textAlign = 'left';
-    ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
+        // Filltext user name
+        var ctx = document.getElementById('character-counts').getContext('2d');
+        ctx.font = '14pt HelveticaNeue-Light';
+        ctx.fillStyle = '#76787A';
+        ctx.textAlign = 'left';
+        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);*/
   }
 
 }
@@ -255,15 +228,15 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       ctx.lineTo(xxx, yyy);
       ctx.stroke();
     }
-    ctx.font = '9pt HelveticaNeue-Light';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('Graph B: time of day', 250, 630);
+    /*    ctx.font = '9pt HelveticaNeue-Light';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText('Graph B: time of day', 250, 630);
 
-    ctx.font = '14pt HelveticaNeue-Light';
-    ctx.fillStyle = '#76787A';
-    ctx.textAlign = 'left';
-    ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
+        ctx.font = '14pt HelveticaNeue-Light';
+        ctx.fillStyle = '#76787A';
+        ctx.textAlign = 'left';
+        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);*/
   }
 
   drawTrianlgeMarker(highestPoint, ctx);
@@ -287,6 +260,9 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     lastY = -1,
     mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
     minOffset = 45; // Inner circle
+
+  var mostUsedCtx = document.getElementById('most-used-markers').getContext('2d');
+  mostUsedCtx.clearRect(0, 0, 500, 650);
 
   ctx.clearRect(0, 0, 500, 650);
 
@@ -363,23 +339,9 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       ctx.lineTo(xxx, yyy);
 
     }
-    ctx.font = '9pt HelveticaNeue-Light';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('Graph C: most used character', 250, 630);
-
-    ctx.font = '14pt HelveticaNeue-Light';
-    ctx.fillStyle = '#76787A';
-    ctx.textAlign = 'left';
-    ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
-
-    // Draw the markers
-    drawMarkers(models.mostUsedMarkers, ctx);
-
-    var mostUsedCtx = document.getElementById('most-used-markers').getContext('2d');
-    mostUsedCtx.clearRect(0, 0, 500, 650);
-    drawMarkers(models.mostUsedMarkers, mostUsedCtx);
   }
+
+  drawMarkers(models.mostUsedMarkers, mostUsedCtx);
 
   ctx.stroke();
 
@@ -495,10 +457,103 @@ function parseData(data) {
   models['mostUsedChar'] = mostUsedChar;
 
   // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('charater-counts').getContext('2d'), models.charCount, true);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
+  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
+  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
+  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
 
+}
+
+function setupGUI() {
+
+  var DatGUIConfig = function() {
+    this.showMerged = false;
+  };
+
+  var config = new DatGUIConfig(),
+    datGUI = new dat.GUI();
+
+  var ChartAConfig = new(function() {
+    this.chartVisible = true;
+    this.outerVisible = false;
+  });
+
+  var fA = datGUI.addFolder('Chart A');
+
+  fA.add(ChartAConfig, 'chartVisible').onChange(function(newVal) {
+    var $el = $('#character-counts');
+    if (newVal) {
+      $el.show();
+    } else {
+      $el.hide();
+    }
+  });
+
+  fA.add(ChartAConfig, 'outerVisible').onChange(function(newVal) {
+    renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, newVal);
+  });
+
+  fA.open();
+
+  var ChartBConfig = new(function() {
+    this.chartVisible = true;
+    this.outerVisible = false;
+  });
+
+  var fB = datGUI.addFolder('Chart B');
+  fB.add(ChartBConfig, 'chartVisible').onChange(function(newVal) {
+    var $el = $('#time-of-day');
+    if (newVal) {
+      $el.show();
+    } else {
+      $el.hide();
+    }
+  });
+  fB.add(ChartBConfig, 'outerVisible').onChange(function(newVal) {
+    renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, newVal);
+  });
+  fB.open();
+
+  var ChartCConfig = new(function() {
+    this.chartVisible = true;
+    this.outerVisible = false;
+  });
+
+  var fC = datGUI.addFolder('Chart sC');
+  fC.add(ChartCConfig, 'chartVisible').onChange(function(newVal) {
+    var $elems = $('#most-used, #most-used-markers');
+    if (newVal) {
+      $elems.show();
+    } else {
+      $elems.hide();
+    }
+  });
+  fC.add(ChartCConfig, 'outerVisible').onChange(function(newVal) {
+    renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, newVal);
+  });
+  fC.open();
+
+  //datGUI.add(config, 'showMerged');
+
+  /*  (datGUI.add(config, 'showMerged')).onChange(function(newVal) {
+      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, !newVal);
+      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, !newVal);
+      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, !newVal);
+
+      $('#character-counts, #time-of-day, #most-used, #most-used-markers').toggleClass('merged')
+
+      if (newVal === true) {
+        var ctx = document.getElementById('most-used').getContext('2d');
+        ctx.font = '14pt HelveticaNeue-Light';
+        ctx.fillStyle = '#76787A';
+        ctx.textAlign = 'left';
+        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
+        ctx.font = '9pt HelveticaNeue-Light';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText('Layering of all three - looks pretty cool, just sayin.', 250, 630);
+      }
+
+    });*/
 }
 
 function init() {
@@ -506,6 +561,12 @@ function init() {
   promise.then(function(data) {
     parseData(data);
   });
+
+  var ctx = document.getElementById('background').getContext('2d');
+  ctx.font = '14pt HelveticaNeue-Light';
+  ctx.fillStyle = '#76787A';
+  ctx.textAlign = 'left';
+  ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
 
   setupGUI();
 }
