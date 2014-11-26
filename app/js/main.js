@@ -457,9 +457,11 @@ function parseData(data) {
   models['mostUsedChar'] = mostUsedChar;
 
   // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
+  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
   renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
   renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
+
+  $('#time-of-day, #most-used, #most-used-markers').hide();
 
 }
 
@@ -474,7 +476,7 @@ function setupGUI() {
 
   var ChartAConfig = new(function() {
     this.chartVisible = true;
-    this.outerVisible = false;
+    this.outerVisible = true;
   });
 
   var fA = datGUI.addFolder('Chart A');
@@ -495,7 +497,7 @@ function setupGUI() {
   fA.open();
 
   var ChartBConfig = new(function() {
-    this.chartVisible = true;
+    this.chartVisible = false;
     this.outerVisible = false;
   });
 
@@ -514,7 +516,7 @@ function setupGUI() {
   fB.open();
 
   var ChartCConfig = new(function() {
-    this.chartVisible = true;
+    this.chartVisible = false;
     this.outerVisible = false;
   });
 
@@ -531,29 +533,6 @@ function setupGUI() {
     renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, newVal);
   });
   fC.open();
-
-  //datGUI.add(config, 'showMerged');
-
-  /*  (datGUI.add(config, 'showMerged')).onChange(function(newVal) {
-      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, !newVal);
-      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, !newVal);
-      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, !newVal);
-
-      $('#character-counts, #time-of-day, #most-used, #most-used-markers').toggleClass('merged')
-
-      if (newVal === true) {
-        var ctx = document.getElementById('most-used').getContext('2d');
-        ctx.font = '14pt HelveticaNeue-Light';
-        ctx.fillStyle = '#76787A';
-        ctx.textAlign = 'left';
-        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
-        ctx.font = '9pt HelveticaNeue-Light';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.fillText('Layering of all three - looks pretty cool, just sayin.', 250, 630);
-      }
-
-    });*/
 }
 
 function init() {
