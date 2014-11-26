@@ -123,7 +123,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     lastX = -1,
     lastY = -1,
     mult = utils.getDistMult(dataObj, drawConfig.radius - 225),
-    minOffset = 45; // Inner circle
+    minOffset = 41; // Inner circle
 
   // console.log('Using Multiplyer :: ', mult);
 
@@ -336,7 +336,7 @@ function drawMarkers(points, ctx) {
     //console.log('drawing point', point.x, point.y);
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(3, 161, 220, 1)';
-    ctx.arc(point.x, point.y, 4, 0, 2 * Math.PI);
+    ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
     ctx.closePath();
     ctx.stroke();
   }
@@ -466,9 +466,9 @@ function setupGUI() {
   fA.add(ChartAConfig, 'chartVisible').onChange(function(newVal) {
     var $el = $('#character-counts');
     if (newVal) {
-      $el.show();
+      $el.fadeIn(350);
     } else {
-      $el.hide();
+      $el.fadeOut(250);
     }
   });
 
@@ -487,9 +487,9 @@ function setupGUI() {
   fB.add(ChartBConfig, 'chartVisible').onChange(function(newVal) {
     var $el = $('#time-of-day');
     if (newVal) {
-      $el.show();
+      $el.fadeIn(350);
     } else {
-      $el.hide();
+      $el.fadeOut(250);
     }
   });
   fB.add(ChartBConfig, 'outerVisible').onChange(function(newVal) {
@@ -506,9 +506,9 @@ function setupGUI() {
   fC.add(ChartCConfig, 'chartVisible').onChange(function(newVal) {
     var $elems = $('#most-used, #most-used-markers');
     if (newVal) {
-      $elems.show();
+      $elems.fadeIn(350);
     } else {
-      $elems.hide();
+      $elems.fadeOut(250);
     }
   });
   fC.add(ChartCConfig, 'outerVisible').onChange(function(newVal) {
@@ -518,7 +518,7 @@ function setupGUI() {
 }
 
 function init() {
-  var promise = $.getJSON('http://localhost:5000/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
+  var promise = $.getJSON('/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
   promise.then(function(data) {
     parseData(data);
   });

@@ -41,13 +41,19 @@
   background-color: rgba(39, 54, 63, 1);
 }
 
+.chart {
+  position: relative;
+}
+
 #character-counts,
 #time-of-day,
 #most-used,
 #most-used-markers,
 #background {
-  position: relative;
-  display: inline-block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
   float: left;
   margin: 0;
   padding: 0;
@@ -82,11 +88,20 @@
 
 body {
   .dg.ac {
-    z-index: 100;
+    z-index: 101;
+    position: relative;
   }
+  /*   .dg.a {
+      float: none;
+    } */
 }
 
 @media (max-width: 500px) {
+  body {
+    .dg.ac {
+      display: none;
+    }
+  }
   #character-counts,
   #time-of-day,
   #most-used,
