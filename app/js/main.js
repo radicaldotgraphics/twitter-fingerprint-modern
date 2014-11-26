@@ -227,7 +227,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 }
 
 function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
-  var chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '!', '?', '/', '#', '$', '%', '&', '*', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '@', '.', ',', ':', '"'];
+  var chars = utils.getCharacters();
 
   var numPoints = chars.length,
     angleIncrement = (360 / numPoints),
@@ -517,24 +517,30 @@ function setupGUI() {
   fC.open();
 }
 
+function addCenterX() {
+  var ctx = document.getElementById('background').getContext('2d');
+  ctx.font = '5pt HelveticaNeue-Light';
+  ctx.fillStyle = '#76787A';
+  ctx.textAlign = 'center';
+  ctx.fillText('X', drawConfig.centerX, drawConfig.centerY + 2);
+}
+
+function addUserNameTextToBackgroundLayer() {
+  var ctx = document.getElementById('background').getContext('2d');
+  ctx.font = '14pt HelveticaNeue-Light';
+  ctx.fillStyle = '#76787A';
+  ctx.textAlign = 'left';
+  ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
+}
+
 function init() {
   var promise = $.getJSON('/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
   promise.then(function(data) {
     parseData(data);
   });
 
-  var ctx = document.getElementById('background').getContext('2d');
-  ctx.font = '14pt HelveticaNeue-Light';
-  ctx.fillStyle = '#76787A';
-  ctx.textAlign = 'left';
-  ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
-
-  ctx = document.getElementById('background').getContext('2d');
-  ctx.font = '5pt HelveticaNeue-Light';
-  ctx.fillStyle = '#76787A';
-  ctx.textAlign = 'center';
-  ctx.fillText('X', drawConfig.centerX, drawConfig.centerY + 2);
-
+  addUserNameTextToBackgroundLayer();
+  addCenterX();
 
   setupGUI();
 }
