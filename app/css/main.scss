@@ -41,9 +41,14 @@
   background-color: rgba(39, 54, 63, 1);
 }
 
-#time-of-day {
+#charater-counts,
+#time-of-day,
+#most-used {
   position: relative;
-  display: block;
+  display: inline-block;
+  float: left;
+  margin: 0;
+  padding: 0;
   width: 500px;
   height: 650px;
   background-color: rgba(39, 54, 63, 1);
