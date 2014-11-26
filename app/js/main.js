@@ -529,6 +529,13 @@ function init() {
   ctx.textAlign = 'left';
   ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
 
+  ctx = document.getElementById('background').getContext('2d');
+  ctx.font = '5pt HelveticaNeue-Light';
+  ctx.fillStyle = '#76787A';
+  ctx.textAlign = 'center';
+  ctx.fillText('X', drawConfig.centerX, drawConfig.centerY + 2);
+
+
   setupGUI();
 }
 
