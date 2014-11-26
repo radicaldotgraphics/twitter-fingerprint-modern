@@ -55,11 +55,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
   }
   ctx.stroke();
   ctx.closePath();
-  // Fill center
-  /*  ctx.fillStyle = 'rgba(39, 54, 63, 1)';
-    ctx.moveTo(drawConfig.centerX, drawConfig.centerY);
-    ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI);
-    ctx.fill();*/
 
   // Mask the inside
   ctx.beginPath();
@@ -95,6 +90,11 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
 
       // Place times ever 10th character
       if (i % 10 == 9) {
+        if (i === 139) {
+          ctx.fillStyle = '#ffffff';
+        } else {
+          ctx.fillStyle = '#76787A';
+        }
         ctx.fillText(i + 1, textX, textY);
         ctx.strokeStyle = '#ffffff';
       } else {
@@ -106,18 +106,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
       ctx.stroke();
     }
     ctx.closePath();
-
-    /*    ctx.font = '9pt HelveticaNeue-Light';
-        ctx.fillStyle = '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.fillText('Graph A: character count within a tweet', 250, 630);
-
-        // Filltext user name
-        var ctx = document.getElementById('character-counts').getContext('2d');
-        ctx.font = '14pt HelveticaNeue-Light';
-        ctx.fillStyle = '#76787A';
-        ctx.textAlign = 'left';
-        ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);*/
   }
 
 }
