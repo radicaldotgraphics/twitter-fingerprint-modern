@@ -27,44 +27,57 @@ var Point = function(x, y) {
   this.y = y || 0;
 };
 
-function renderCharCountChart(ctx, dataObj, renderOutlines) {
-  var numPoints = Object.keys(dataObj).length,
-    angleIncrement = (360 / numPoints),
-    rad = Math.PI / 180;
+var charCountLines = [];
 
-  var i = 0,
-    mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
-    minOffset = 41;
+function drawLines(lines, lineWidth, color, ctx) {
 
-  ctx.clearRect(0, 0, 500, 650);
-
-  ctx.lineWidth = 1.75;
-  ctx.strokeStyle = '#EC0972';
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
   ctx.beginPath();
 
-  for (var key in dataObj) {
-    var amount = dataObj[key],
-      angleStep = (angleIncrement * i - 88),
-      x = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
-      y = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
-
-    ctx.moveTo(drawConfig.centerX, drawConfig.centerY);
-    ctx.lineTo(drawConfig.centerX + x, drawConfig.centerY + y);
-
-    i++;
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    ctx.moveTo(line.start.x, line.start.y);
+    ctx.lineTo(line.end.x, line.end.y);
   }
+
   ctx.stroke();
   ctx.closePath();
 
-  // Mask the inside
-  ctx.beginPath();
-  ctx.globalCompositeOperation = 'destination-out'
-  ctx.arc(drawConfig.centerX, drawConfig.centerY, 40, 0, 2 * Math.PI, true);
-  ctx.fill();
-  ctx.closePath();
+  console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
+}
 
-  // Restore composite mode
-  ctx.globalCompositeOperation = 'source-over';
+function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
+  var numPoints = Object.keys(dataObj).length,
+    angleIncrement = (360 / numPoints),
+    rad = Math.PI / 180,
+    i = 0,
+    mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
+    minOffset = 41;
+
+  // Clear out canvas
+  ctx.clearRect(0, 0, 500, 650);
+
+  // Gather points per line
+  for (var key in dataObj) {
+    var amount = dataObj[key],
+      angleStep = (angleIncrement * i - 90),
+      angleXRad = Math.cos(angleStep * rad),
+      angleYRad = Math.sin(angleStep * rad),
+      dist = mult * amount + minOffset,
+      startPoint = new Point(drawConfig.centerX + minOffset * angleXRad, drawConfig.centerY + minOffset * angleYRad),
+      endPoint = new Point(drawConfig.centerX + dist * angleXRad, drawConfig.centerY + dist * angleYRad);
+
+    charCountLines.push({
+      start: startPoint,
+      end: endPoint
+    });
+
+    i++;
+  }
+
+  // Draw lines in center
+  drawLines(charCountLines, 1.25, '#EC0972', ctx);
 
   i = 0;
   ctx.font = '8pt HelveticaNeue-Light';
@@ -76,11 +89,11 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
   ctx.beginPath();
   // Draw tick marks around circumference
   //
-  if (renderOutlines) {
+  if (renderOutlineMarkers) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
       var circRadius = 222,
-        angleStep = (angleIncrement * i - 88),
+        angleStep = (angleIncrement * i - 90),
         xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
         yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
         xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
