@@ -10,53 +10,71 @@ var $ = require('jquery'),
 
 if (user.length) {
   hardCodedTwitterUserForTestingLocally = user;
+  console.log(user);
 }
-console.log(user);
 
-var drawConfig = {
-  radius: 335,
-  centerX: 250,
-  centerY: 325
+//////////////////////////////////////////////////////////
+// CONSTANTS
+
+// Common draw variables
+var DrawConfig = {
+  CANVAS_WIDTH: 500,
+  CANVAS_HEIGHT: 650,
+  RADIUS: 335,
+  CENTER_X: 250,
+  CENTER_Y: 325
 };
+
+// Common colors store
+var Colors = {
+  GRAY: '#76787A',
+  PINK: '#EC0972',
+  WHITE: '#FFFFFF',
+  BRIGHT_BLUE: '#0696CB',
+  TIME_OF_DAY_FILL: '#195872',
+  MOST_USED_FILL: '#1D3C46',
+  GREEN: '#00FF00'
+}
+
+// Text alignments
+var TextAlign = {
+  LEFT: 'left',
+  CENTER: 'center',
+  RIGHT: 'right'
+}
+
+// TODO: add canvas element names as constants
+// var CanvasClassIds = {}
+
+// END CONSTANTS
+///////////////////////////////////////////////////////////
 
 // When data parses store in hash
 var models = {};
 
+// Convenience cartesian point object
 var Point = function(x, y) {
   this.x = x || 0;
   this.y = y || 0;
 };
 
-var charCountLines = [];
-
-function drawLines(lines, lineWidth, color, ctx) {
-
-  ctx.strokeStyle = color;
-  ctx.lineWidth = lineWidth;
-  ctx.beginPath();
-
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    ctx.moveTo(line.start.x, line.start.y);
-    ctx.lineTo(line.end.x, line.end.y);
-  }
-
-  ctx.stroke();
-  ctx.closePath();
-
-  console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
-}
-
+/**
+ * Renders the char count per tweet chart
+ * @param  {Object} ctx canvas 2d context object
+ * @param  {Object} dataObj data hash of values to plot against
+ * @param  {Boolean} renderOutlineMarkers should we draw the map with the outline indicators
+ */
 function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   var numPoints = Object.keys(dataObj).length,
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180,
     i = 0,
-    mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
-    minOffset = 41;
+    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
+    minOffset = 40,
+    charCountLines = [];
 
   // Clear out canvas
-  ctx.clearRect(0, 0, 500, 650);
+  ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
   // Gather points per line
   for (var key in dataObj) {
@@ -65,8 +83,8 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
       angleXRad = Math.cos(angleStep * rad),
       angleYRad = Math.sin(angleStep * rad),
       dist = mult * amount + minOffset,
-      startPoint = new Point(drawConfig.centerX + minOffset * angleXRad, drawConfig.centerY + minOffset * angleYRad),
-      endPoint = new Point(drawConfig.centerX + dist * angleXRad, drawConfig.centerY + dist * angleYRad);
+      startPoint = new Point(DrawConfig.CENTER_X + minOffset * angleXRad, DrawConfig.CENTER_Y + minOffset * angleYRad),
+      endPoint = new Point(DrawConfig.CENTER_X + dist * angleXRad, DrawConfig.CENTER_Y + dist * angleYRad);
 
     charCountLines.push({
       start: startPoint,
@@ -77,16 +95,13 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   }
 
   // Draw lines in center
-  drawLines(charCountLines, 1.25, '#EC0972', ctx);
+  drawLines(charCountLines, 3, Colors.PINK, ctx);
 
-  i = 0;
   ctx.font = '8pt HelveticaNeue-Light';
-  ctx.fillStyle = '#76787A';
-  ctx.strokeStyle = '#76787A';
-  ctx.textAlign = 'center';
-  ctx.lineWidth = 1;
+  ctx.fillStyle = Colors.GRAY;
+  ctx.strokeStyle = Colors.GRAY;
+  ctx.textAlign = TextAlign.CENTER;
 
-  ctx.beginPath();
   // Draw tick marks around circumference
   //
   if (renderOutlineMarkers) {
@@ -94,31 +109,32 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
       ctx.beginPath();
       var circRadius = 222,
         angleStep = (angleIncrement * i - 90),
-        xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
-        yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
-        xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
-        yyy = drawConfig.centerY + (circRadius + 10) * Math.sin(angleStep * rad),
-        textX = drawConfig.centerX + (circRadius + 20) * Math.cos(angleStep * rad),
-        textY = drawConfig.centerY + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
+        angleXRad = Math.cos(angleStep * rad),
+        angleYRad = Math.sin(angleStep * rad),
+        startPoint = new Point(DrawConfig.CENTER_X + circRadius * angleXRad, DrawConfig.CENTER_Y + circRadius * angleYRad),
+        endPoint = new Point(DrawConfig.CENTER_X + (circRadius + 10) * angleXRad, DrawConfig.CENTER_Y + (circRadius + 10) * angleYRad),
+        textX = DrawConfig.CENTER_X + (circRadius + 20) * Math.cos(angleStep * rad),
+        textY = DrawConfig.CENTER_Y + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
 
       // Place times ever 10th character
       if (i % 10 == 9) {
         if (i === 139) {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = Colors.WHITE;
         } else {
-          ctx.fillStyle = '#76787A';
+          ctx.fillStyle = Colors.GRAY;
         }
         ctx.fillText(i + 1, textX, textY);
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = Colors.WHITE;
       } else {
-        ctx.strokeStyle = '#76787A';
+        ctx.strokeStyle = Colors.GRAY;
       }
 
-      ctx.moveTo(xx, yy);
-      ctx.lineTo(xxx, yyy);
-      ctx.stroke();
+      drawTickIndicator({
+        start: startPoint,
+        end: endPoint
+      }, 1, ctx);
     }
-    ctx.closePath();
+
   }
 
 }
@@ -128,19 +144,17 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180;
 
-  var markers = [];
-
   var i = 0,
     startX = -1,
     startY = -1,
     lastX = -1,
     lastY = -1,
-    mult = utils.getDistMult(dataObj, drawConfig.radius - 225),
+    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS - 225),
     minOffset = 41; // Inner circle
 
   // console.log('Using Multiplyer :: ', mult);
 
-  ctx.clearRect(0, 0, 500, 650);
+  ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
   ctx.beginPath();
 
@@ -155,11 +169,9 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       currX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
       currY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
 
-    //console.log(key, '==>', amount);
-
     if (startX === -1 && startY === -1) {
-      startX = drawConfig.centerX + currX;
-      startY = drawConfig.centerY + currY;
+      startX = DrawConfig.CENTER_X + currX;
+      startY = DrawConfig.CENTER_Y + currY;
     }
 
     // Next point to draw to
@@ -171,38 +183,30 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     } else {
       if (i === 0) {
 
-        lastX = drawConfig.centerX + nextX;
-        lastY = drawConfig.centerY + nextY;
+        lastX = DrawConfig.CENTER_X + nextX;
+        lastY = DrawConfig.CENTER_Y + nextY;
 
-        ctx.moveTo(drawConfig.centerX + currX, drawConfig.centerY + currY);
+        ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
         ctx.lineTo(lastX, lastY);
-
-        // push new point to mark
-        markers.push(new Point(drawConfig.centerX + currX, drawConfig.centerY + currY));
 
       } else {
-        lastX = drawConfig.centerX + nextX;
-        lastY = drawConfig.centerY + nextY;
+        lastX = DrawConfig.CENTER_X + nextX;
+        lastY = DrawConfig.CENTER_Y + nextY;
 
         ctx.lineTo(lastX, lastY);
-
-        // push new point to mark
-        markers.push(new Point(lastX, lastY));
-
       }
-
     }
 
     if (amount > highestVal) {
       highestVal = amount;
-      highestPoint = new Point(drawConfig.centerX + currX, drawConfig.centerY + currY);
+      highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
     }
 
     i++;
   }
 
   ctx.closePath();
-  ctx.fillStyle = 'rgb(25, 88, 114)';
+  ctx.fillStyle = Colors.TIME_OF_DAY_FILL;
   ctx.fill();
 
   // Draw tick marks around circumference
@@ -211,21 +215,21 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       ctx.beginPath();
       var circRadius = 180,
         angleStep = (angleIncrement * i - 75),
-        xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
-        yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
-        xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
-        yyy = drawConfig.centerY + (circRadius + 10) * Math.sin(angleStep * rad),
-        textX = drawConfig.centerX + (circRadius - 12) * Math.cos(angleStep * rad),
-        textY = drawConfig.centerY + 3 + (circRadius - 12) * Math.sin(angleStep * rad);
+        xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
+        yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
+        xxx = DrawConfig.CENTER_X + (circRadius + 10) * Math.cos(angleStep * rad),
+        yyy = DrawConfig.CENTER_Y + (circRadius + 10) * Math.sin(angleStep * rad),
+        textX = DrawConfig.CENTER_X + (circRadius - 12) * Math.cos(angleStep * rad),
+        textY = DrawConfig.CENTER_Y + 3 + (circRadius - 12) * Math.sin(angleStep * rad);
       // Place times ever 10th character
       if (i % 6 == 5) {
         ctx.font = '8pt HelveticaNeue-Light';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#76787A';
+        ctx.textAlign = TextAlign.CENTER;
+        ctx.fillStyle = Colors.GRAY;
         ctx.fillText(i + 1, textX, textY);
-        ctx.strokeStyle = '#ffffff';
+        ctx.strokeStyle = Colors.WHITE;
       } else {
-        ctx.strokeStyle = '#76787A';
+        ctx.strokeStyle = Colors.GRAY;
       }
 
       ctx.moveTo(xx, yy);
@@ -246,20 +250,20 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180;
 
-  var markers = models.mostUsedMarkers = [];
+  var markers = [];
 
   var i = 0,
     startX = -1,
     startY = -1,
     lastX = -1,
     lastY = -1,
-    mult = utils.getDistMult(dataObj, drawConfig.radius * 0.5),
+    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
     minOffset = 45; // Inner circle
 
   var mostUsedCtx = document.getElementById('most-used-markers').getContext('2d');
-  mostUsedCtx.clearRect(0, 0, 500, 650);
+  mostUsedCtx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
-  ctx.clearRect(0, 0, 500, 650);
+  ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
   ctx.beginPath();
 
@@ -273,8 +277,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     //console.log('plotting: ', chars[i], dataObj[chars[i]] || 0);
 
     if (startX === -1 && startY === -1) {
-      startX = drawConfig.centerX + currX;
-      startY = drawConfig.centerY + currY;
+      startX = DrawConfig.CENTER_X + currX;
+      startY = DrawConfig.CENTER_Y + currY;
     }
 
     // Next point to draw to
@@ -285,14 +289,14 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       ctx.lineTo(startX, startY); // Gets back to home to fill
     } else {
       if (i === 0) {
-        lastX = drawConfig.centerX + nextX;
-        lastY = drawConfig.centerY + nextY;
-        ctx.moveTo(drawConfig.centerX + currX, drawConfig.centerY + currY);
+        lastX = DrawConfig.CENTER_X + nextX;
+        lastY = DrawConfig.CENTER_Y + nextY;
+        ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
         ctx.lineTo(lastX, lastY);
         markers.push(new Point(lastX, lastY));
       } else {
-        lastX = drawConfig.centerX + nextX;
-        lastY = drawConfig.centerY + nextY;
+        lastX = DrawConfig.CENTER_X + nextX;
+        lastY = DrawConfig.CENTER_Y + nextY;
         ctx.lineTo(lastX, lastY);
         markers.push(new Point(lastX, lastY));
       }
@@ -301,34 +305,34 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.closePath();
 
-  ctx.fillStyle = 'rgb(29, 60, 74)';
+  ctx.fillStyle = Colors.MOST_USED_FILL;
   ctx.fill();
 
-  ctx.fillStyle = '#76787A';
+  ctx.fillStyle = Colors.GRAY;
   ctx.beginPath();
 
   if (renderOutlines) {
     for (var i = 0; i < chars.length; i++) {
       var circRadius = 222,
         angleStep = (angleIncrement * i - 90),
-        xx = drawConfig.centerX + circRadius * Math.cos(angleStep * rad),
-        yy = drawConfig.centerY + circRadius * Math.sin(angleStep * rad),
-        xxx = drawConfig.centerX + (circRadius + 10) * Math.cos(angleStep * rad),
-        yyy = drawConfig.centerY + (circRadius + 10) * Math.sin(angleStep * rad),
-        textX = drawConfig.centerX + (circRadius + 20) * Math.cos(angleStep * rad),
-        textY = drawConfig.centerY + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
+        xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
+        yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
+        xxx = DrawConfig.CENTER_X + (circRadius + 10) * Math.cos(angleStep * rad),
+        yyy = DrawConfig.CENTER_Y + (circRadius + 10) * Math.sin(angleStep * rad),
+        textX = DrawConfig.CENTER_X + (circRadius + 20) * Math.cos(angleStep * rad),
+        textY = DrawConfig.CENTER_Y + 3 + (circRadius + 20) * Math.sin(angleStep * rad);
       // Place times ever 10th character
 
-      ctx.textAlign = 'center';
+      ctx.textAlign = TextAlign.CENTER;
 
       if (i < 26 || i > 33 && i < 44 || i > 28 && i < 30) {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = Colors.WHITE;
       } else {
-        ctx.fillStyle = '#76787A';
+        ctx.fillStyle = Colors.GRAY;
       }
       ctx.font = '8pt HelveticaNeue-Light';
       ctx.fillText(chars[i].toUpperCase(), textX, textY);
-      ctx.strokeStyle = '#76787A';
+      ctx.strokeStyle = Colors.GRAY;
 
       ctx.moveTo(xx, yy);
       ctx.lineTo(xxx, yyy);
@@ -336,10 +340,46 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     }
   }
 
-  drawMarkers(models.mostUsedMarkers, mostUsedCtx);
+  drawMarkers(markers, mostUsedCtx);
 
   ctx.stroke();
 
+}
+
+function drawTickIndicator(line, lineWidth, ctx) {
+
+  if (!ctx) {
+    throw new Error('Main: drawTickIndicator method: must pass a canvas element context 2d');
+  }
+
+  ctx.beginPath();
+  ctx.lineWidth = lineWidth || 1;
+  ctx.moveTo(line.start.x, line.start.y);
+  ctx.lineTo(line.end.x, line.end.y);
+  ctx.stroke();
+  ctx.closePath();
+}
+
+function drawLines(lines, lineWidth, color, ctx) {
+
+  if (!ctx) {
+    throw new Error('Main: drawLines method: must pass a canvas element context 2d');
+  }
+
+  ctx.strokeStyle = color || Colors.GREEN;
+  ctx.lineWidth = lineWidth || 1;
+  ctx.beginPath();
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    ctx.moveTo(line.start.x, line.start.y);
+    ctx.lineTo(line.end.x, line.end.y);
+  }
+
+  ctx.stroke();
+  ctx.closePath();
+
+  console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
 }
 
 function drawMarkers(points, ctx) {
@@ -348,7 +388,7 @@ function drawMarkers(points, ctx) {
     var point = points[i];
     //console.log('drawing point', point.x, point.y);
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(3, 161, 220, 1)';
+    ctx.strokeStyle = Colors.BRIGHT_BLUE;
     ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
     ctx.closePath();
     ctx.stroke();
@@ -360,8 +400,8 @@ function drawTrianlgeMarker(point, ctx) {
     tH = 6;
 
   ctx.beginPath();
-  ctx.strokeStyle = 'rgba(3, 161, 220, 1)';
-  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = Colors.BRIGHT_BLUE;
+  ctx.fillStyle = Colors.WHITE;
   ctx.lineWidth = 1.5;
   ctx.moveTo(point.x - tW, point.y + 3);
   ctx.lineTo(point.x + 0, point.y - tH);
@@ -458,6 +498,9 @@ function parseData(data) {
 
   $('#time-of-day, #most-used, #most-used-markers').hide();
 
+
+  drawCENTER_X();
+
 }
 
 function setupGUI() {
@@ -530,19 +573,19 @@ function setupGUI() {
   //fC.open();
 }
 
-function addCenterX() {
+function drawCENTER_X() {
   var ctx = document.getElementById('background').getContext('2d');
   ctx.font = '5pt HelveticaNeue-Light';
   ctx.fillStyle = '#76787A';
-  ctx.textAlign = 'center';
-  ctx.fillText('X', drawConfig.centerX, drawConfig.centerY + 2);
+  ctx.textAlign = TextAlign.CENTER;
+  ctx.fillText('X', DrawConfig.CENTER_X, DrawConfig.CENTER_Y + 2);
 }
 
 function addUserNameTextToBackgroundLayer() {
   var ctx = document.getElementById('background').getContext('2d');
   ctx.font = '14pt HelveticaNeue-Light';
   ctx.fillStyle = '#76787A';
-  ctx.textAlign = 'left';
+  ctx.textAlign = TextAlign.LEFT;
   ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
 }
 
@@ -555,7 +598,7 @@ function getData() {
 
 function init() {
   addUserNameTextToBackgroundLayer();
-  addCenterX();
+
   setupGUI();
 
   getData();
