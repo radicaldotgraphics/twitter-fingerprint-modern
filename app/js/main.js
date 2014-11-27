@@ -38,7 +38,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlines) {
 
   ctx.clearRect(0, 0, 500, 650);
 
-  ctx.lineWidth = 1.25;
+  ctx.lineWidth = 1.75;
   ctx.strokeStyle = '#EC0972';
   ctx.beginPath();
 
@@ -461,7 +461,7 @@ function setupGUI() {
     this.outerVisible = true;
   });
 
-  var fA = datGUI.addFolder('Chart A');
+  var fA = datGUI.addFolder('Character Count');
 
   fA.add(ChartAConfig, 'chartVisible').onChange(function(newVal) {
     var $el = $('#character-counts');
@@ -476,14 +476,14 @@ function setupGUI() {
     renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, newVal);
   });
 
-  fA.open();
+  //fA.open();
 
   var ChartBConfig = new(function() {
     this.chartVisible = false;
     this.outerVisible = false;
   });
 
-  var fB = datGUI.addFolder('Chart B');
+  var fB = datGUI.addFolder('Time of Day');
   fB.add(ChartBConfig, 'chartVisible').onChange(function(newVal) {
     var $el = $('#time-of-day');
     if (newVal) {
@@ -495,14 +495,14 @@ function setupGUI() {
   fB.add(ChartBConfig, 'outerVisible').onChange(function(newVal) {
     renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, newVal);
   });
-  fB.open();
+  //fB.open();
 
   var ChartCConfig = new(function() {
     this.chartVisible = false;
     this.outerVisible = false;
   });
 
-  var fC = datGUI.addFolder('Chart sC');
+  var fC = datGUI.addFolder('Most Used Character');
   fC.add(ChartCConfig, 'chartVisible').onChange(function(newVal) {
     var $elems = $('#most-used, #most-used-markers');
     if (newVal) {
@@ -514,7 +514,7 @@ function setupGUI() {
   fC.add(ChartCConfig, 'outerVisible').onChange(function(newVal) {
     renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, newVal);
   });
-  fC.open();
+  //fC.open();
 }
 
 function addCenterX() {
@@ -533,16 +533,19 @@ function addUserNameTextToBackgroundLayer() {
   ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
 }
 
-function init() {
+function getData() {
   var promise = $.getJSON('/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
   promise.then(function(data) {
     parseData(data);
   });
+}
 
+function init() {
   addUserNameTextToBackgroundLayer();
   addCenterX();
-
   setupGUI();
+
+  getData();
 }
 
 $(init);

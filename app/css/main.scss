@@ -2,47 +2,31 @@
 @import "base/typography";
 @import "base/grid";
 
-.submit-btn {}
-
-.results {
-  margin-top: 50px;
-  p {
-    margin: 5px 0 5px 0;
-  }
-  display: none;
+html,
+body {
+  background-color: #27363f;
+  height: 100%;
 }
 
-.pre-loader {
-  display: block;
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  margin: auto;
-}
-
-.main {
+body {
   position: relative;
 }
 
-.inspiration {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-#artboard {
+.chart-wrap {
   position: relative;
+  width: 100%;
+  height: 100%;
   display: block;
-  width: 500px;
-  height: 650px;
-  background-color: rgba(39, 54, 63, 1);
 }
 
 .chart {
   position: relative;
+  max-width: 500px;
+  top: 50%;
+  margin: auto;
+  transform: translateY(-50%);
+  height: 70%;
+  display: block;
 }
 
 #character-counts,
@@ -90,11 +74,7 @@
 body {
   .dg.ac {
     z-index: 101;
-    position: relative;
   }
-  /*   .dg.a {
-      float: none;
-    } */
 }
 
 @media (max-width: 500px) {
@@ -102,6 +82,10 @@ body {
     .dg.ac {
       display: none;
     }
+  }
+  .chart {
+    top: auto;
+    transform: none;
   }
   #character-counts,
   #time-of-day,
