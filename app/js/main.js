@@ -94,8 +94,9 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
     i++;
   }
 
-  // Draw lines in center
-  drawLines(charCountLines, 3, Colors.PINK, ctx);
+  // Draw lines extruding from center
+  drawLines(charCountLines, 1, Colors.PINK, ctx);
+  $('#character-counts').addClass('trigger');
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -360,26 +361,52 @@ function drawTickIndicator(line, lineWidth, ctx) {
   ctx.closePath();
 }
 
+function animateLine(line, lineWidth, color, ctx) {
+  var speed = 0.00009;
+
+  function animate() {
+    ctx.strokeStyle = color || Colors.GREEN;
+    ctx.lineWidth = lineWidth || 1;
+    ctx.beginPath();
+    ctx.moveTo(line.start.x, line.start.y);
+    ctx.lineTo(line.start.x + speed * (line.end.x - line.start.x), line.start.y + speed * (line.end.y - line.start.y));
+    ctx.stroke();
+    ctx.closePath();
+
+    if (speed < 1) {
+      speed *= 1.2;
+      if (speed > 1) {
+        speed = 1;
+      }
+      requestAnimationFrame(animate);
+    }
+
+  }
+
+  requestAnimationFrame(animate);
+}
+
 function drawLines(lines, lineWidth, color, ctx) {
 
   if (!ctx) {
     throw new Error('Main: drawLines method: must pass a canvas element context 2d');
   }
 
-  ctx.strokeStyle = color || Colors.GREEN;
-  ctx.lineWidth = lineWidth || 1;
-  ctx.beginPath();
+  //ctx.strokeStyle = color || Colors.GREEN;
+  //ctx.lineWidth = lineWidth || 1;
+  //ctx.beginPath();
 
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
-    ctx.moveTo(line.start.x, line.start.y);
-    ctx.lineTo(line.end.x, line.end.y);
+    //ctx.moveTo(line.start.x, line.start.y);
+    //ctx.lineTo(line.end.x, line.end.y);
+    animateLine(line, lineWidth, color, ctx);
   }
 
-  ctx.stroke();
-  ctx.closePath();
+  //ctx.stroke();
+  //ctx.closePath();
 
-  console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
+  //console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
 }
 
 function drawMarkers(points, ctx) {
@@ -464,7 +491,7 @@ function parseData(data) {
   }
 
   // Normalize character counts
-  for (var j = 1; j <= Object.keys(charCount).length; j++) {
+  for (var j = 1; j <= 140; j++) {
     if (!charCount[j]) {
       charCount[j] = 0;
     }
@@ -498,8 +525,7 @@ function parseData(data) {
 
   $('#time-of-day, #most-used, #most-used-markers').hide();
 
-
-  drawCENTER_X();
+  drawCenterX();
 
 }
 
@@ -573,7 +599,7 @@ function setupGUI() {
   //fC.open();
 }
 
-function drawCENTER_X() {
+function drawCenterX() {
   var ctx = document.getElementById('background').getContext('2d');
   ctx.font = '5pt HelveticaNeue-Light';
   ctx.fillStyle = '#76787A';
@@ -598,9 +624,7 @@ function getData() {
 
 function init() {
   addUserNameTextToBackgroundLayer();
-
   setupGUI();
-
   getData();
 }
 

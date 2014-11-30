@@ -22,9 +22,10 @@ body {
 .chart {
   position: relative;
   max-width: 500px;
-  top: 50%;
+  //top: 50.1%;
   margin: auto;
-  transform: translateY(-50%);
+  /*   transform-style: preserve-3d;
+    transform: translateY(-50.1%); // this is making the canvas blurry */
   height: 70%;
   display: block;
 }
@@ -47,6 +48,14 @@ body {
   z-index: 0;
   &.merged {
     position: absolute;
+  }
+}
+
+#character-counts {
+  transform: rotate(260deg);
+  transition: transform 0.8s ease-in;
+  &.trigger {
+    transform: rotate(0deg);
   }
 }
 
