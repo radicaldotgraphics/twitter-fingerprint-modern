@@ -17,17 +17,50 @@ body {
   width: 100%;
   height: 100%;
   display: block;
+  margin-bottom: 100px;
 }
 
 .chart {
   position: relative;
   max-width: 500px;
+  padding-top: 10px;
   //top: 50.1%;
   margin: auto;
   /*   transform-style: preserve-3d;
     transform: translateY(-50.1%); // this is making the canvas blurry */
   height: 70%;
   display: block;
+}
+
+.chart-inner {
+  position: relative;
+  height: 650px;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.user-name {
+  width: 455px;
+  height: 50px;
+  background-color: #334956;
+  border: none;
+  outline: none;
+  padding-left: 20px;
+  color: white;
+}
+
+.user-submit {
+  position: absolute;
+  top: 7px;
+  right: 30px;
+  background-color: #ef0173;
+  text-align: center;
+  color: white;
+  padding: 10px 15px 10px 15px;
+  user-select: none;
+  cursor: pointer;
 }
 
 #character-counts,
@@ -80,6 +113,44 @@ body {
   z-index: 1;
 }
 
+.option {
+  color: #0080b7;
+  text-transform: uppercase;
+  font-size: 1.1em;
+  user-select: none;
+}
+
+.radio {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  border-radius: 10px;
+  background-color: #5c7685;
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  &:after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 14px;
+    height: 14px;
+    border-radius: 10px;
+    background-color: #feffff;
+    display: none;
+  }
+  &.selected {
+    &:after {
+      display: block;
+    }
+  }
+}
+
+.about {
+  color: #99aab4;
+}
+
 body {
   .dg.ac {
     z-index: 101;
@@ -104,5 +175,18 @@ body {
   #top-layer {
     width: 100%;
     height: auto;
+  }
+}
+
+@media (max-width: 568px) {
+  .chart {
+    max-width: none;
+    padding: 0 20px 0 20px;
+  }
+  .user-submit {
+    right: 2%;
+  }
+  .user-name {
+    width: 95%;
   }
 }

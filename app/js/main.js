@@ -623,7 +623,10 @@ function getData() {
 }
 
 function init() {
-  addUserNameTextToBackgroundLayer();
+  //addUserNameTextToBackgroundLayer();
+  $('.radio').on('click', function(){
+    $(this).toggleClass('selected');
+  });
   setupGUI();
   getData();
 }
