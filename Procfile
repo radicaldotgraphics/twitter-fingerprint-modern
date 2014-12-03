@@ -1,2 +1,2 @@
-web: node server.js
+web: node api/server.js
 heroku ps:scale web=1
