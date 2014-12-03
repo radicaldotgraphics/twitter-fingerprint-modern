@@ -15,13 +15,20 @@ var twitterConfig = {
   "accessTokenSecret": "wXCZMD6xyjmVa72xHOyWV0h0BUxUc1xenAtCd5r0Dbmcy"
 };
 
+
+
 // Set up an express server (not starting it yet)
 var server = express();
+server.set('port', process.env.PORT || 3000);
 
+var http = require('http');
+
+
+var appServer = http.createServer(server);
 // Add live reload
-server.use(livereload({
+/*server.use(livereload({
   port: livereloadport
-}));
+}));*/
 
 server.get('/api/timeline', function(req, res, next) {
 
@@ -50,8 +57,8 @@ server.all('/*', function(req, res) {
   });
 });
 
-server.listen(process.env.PORT || 3000, function(){
-  console.log('Listening on port', process.env.PORT || 3000);
+appServer.listen(server.get('port'), function(){
+  console.log('Express server listening on port ' + server.get('port') , __dirname);
 });
 
 module.exports = {
