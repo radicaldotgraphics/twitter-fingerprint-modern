@@ -64,10 +64,10 @@ appServer.listen(server.get('port'), function() {
   console.log('Express server listening on port ' + server.get('port'), __dirname);
 });
 
-module.exports = {
+/*module.exports = {
   server: server,
   refresh: refresh,
   livereloadport: livereloadport,
   serverport: serverport
 };
-
+*/
