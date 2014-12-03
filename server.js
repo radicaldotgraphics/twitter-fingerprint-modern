@@ -55,7 +55,7 @@ server.get('/', function(req, res) {
     root: __dirname + '/dist'
   });*/
 
-  res.sendFile('index.html', { root: path.join(__dirname, '../dist') });
+  res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
 server.listen(server.get('port'), function() {
