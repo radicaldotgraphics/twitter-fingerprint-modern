@@ -51,7 +51,9 @@ server.get('/api/timeline', function(req, res, next) {
 server.use(express.static('dist'));
 // Because I like HTML5 pushstate .. this redirects everything back to our index.html
 server.get('/', function(req, res) {
-  res.sendFile('index.html');
+  res.sendFile('index.html', {
+    root: './dist'
+  });
 });
 
 server.listen(server.get('port'), function() {
