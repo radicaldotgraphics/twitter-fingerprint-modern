@@ -47,7 +47,7 @@ server.get('/api/timeline', function(req, res, next) {
 });
 
 server.use(express.static(path.join(__dirname, 'dist')));
-server.all('/*', function(req, res) {
+server.all('*', function(req, res) {
   res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
 
