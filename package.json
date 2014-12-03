@@ -3,7 +3,10 @@
   "description": "twitter visualizer",
   "version": "0.0.1",
   "engines": {
-    "node": ">=0.10.26"
+    "node": "0.10.x"
+  },
+  "scripts": {
+    "start": "node server.js"
   },
   "dependencies": {
     "qs": "*",
@@ -30,3 +33,4 @@
     "jquery": "^2.1.1"
   }
 }
+
