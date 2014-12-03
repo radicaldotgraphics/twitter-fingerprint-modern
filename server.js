@@ -20,6 +20,8 @@ var twitterConfig = {
 var server = express();
 server.set('port', process.env.PORT || 3000);
 
+var router = express.Router();
+
 //var http = require('http');
 
 //var appServer = http.createServer(server);
@@ -45,11 +47,14 @@ server.get('/api/timeline', function(req, res, next) {
   }
 
 });
-server.use(server.router);
+
 server.use(express.static(path.join(__dirname, 'dist')));
-server.all('/*', function(req, res) {
+router.use(function(req, res, next) {
   res.sendFile(path.join(__dirname, '../dist', 'index.html'));
 });
+
+server.get('/*', router);
+server.get('/:username', router);
 
 server.listen(server.get('port'), function() {
   console.log('Express server listening on port ' + server.get('port'), __dirname);
