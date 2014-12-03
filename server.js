@@ -1,7 +1,7 @@
 // Modules for webserver and livereload
 var express = require('express'),
-  refresh = require('gulp-livereload'),
-  livereload = require('connect-livereload'),
+/*  refresh = require('gulp-livereload'),
+  livereload = require('connect-livereload'),*/
   path = require('path'),
   livereloadport = 35729,
   serverport = 5000;
