@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "qs": "*",
-    "oauth": "*"
+    "oauth": "*",
+    "express": "^4.10.2"
   },
   "devDependencies": {
     "browserify": "~3.46.0",
