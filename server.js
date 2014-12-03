@@ -23,7 +23,7 @@ server.set('port', process.env.PORT || 3000);
 
 var http = require('http');
 
-var appServer = http.createServer(server);
+
 // Add live reload
 /*server.use(livereload({
   port: livereloadport
@@ -46,6 +46,8 @@ server.get('/api/timeline', function(req, res, next) {
   }
 
 });
+
+var appServer = http.createServer(server);
 
 // Use our 'dist' folder as rootfolder
 //server.use(express.static('dist'));
