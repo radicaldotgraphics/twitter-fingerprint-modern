@@ -52,7 +52,7 @@ server.use(express.static('dist'));
 // Because I like HTML5 pushstate .. this redirects everything back to our index.html
 server.get('/', function(req, res) {
   res.sendFile('index.html', {
-    root: express.static(path.join(__dirname, 'dist'))
+    root: '/dist'
   });
 });
 
