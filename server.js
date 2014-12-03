@@ -1,7 +1,7 @@
 // Modules for webserver and livereload
 var express = require('express'),
-/*  refresh = require('gulp-livereload'),
-  livereload = require('connect-livereload'),*/
+  /*  refresh = require('gulp-livereload'),
+    livereload = require('connect-livereload'),*/
   path = require('path'),
   livereloadport = 35729,
   serverport = 5000;
@@ -52,7 +52,7 @@ server.use(express.static(path.join(__dirname, 'dist')));
 // Because I like HTML5 pushstate .. this redirects everything back to our index.html
 server.get('/', function(req, res) {
   res.sendFile('index.html', {
-    root: '/'
+    root: __dirname + '/dist'
   });
 });
 
