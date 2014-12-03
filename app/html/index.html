@@ -18,7 +18,7 @@
     <div class="chart">
       <h1>Hello.</h1>
       <div class="input-wrap">
-        <input class="user-name" type="text" placeholder="@gaberuane" />
+        <input class="user-name" type="text" placeholder="@username" />
         <div class="user-submit">RUN</div>
       </div>
       <div class="chart-inner">
@@ -29,18 +29,23 @@
         <canvas class="merged" id="most-used-markers" width="500" height="650"></canvas>
         <canvas class="merged" id="top-layer" width="500" height="650"></canvas>
       </div>
-      <h2>Display.</h2>
-      <p class="option">Tweet Character Count</p>
-      <div class="radio"></div>
-      <div class="radio"></div>
-      <p class="option">Time of Day Tweeting</p>
-      <div class="radio"></div>
-      <div class="radio"></div>
-      <p class="option">Most Used Character</p>
-      <div class="radio"></div>
-      <div class="radio"></div>
-      <h2>About.</h2>
-      <p class="about">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p>
+      <div class="info">
+        <h2>Display.</h2>
+        <p class="option">Tweet Character Count</p>
+        <div chart-option data-chart-parts="#character-counts" class="radio selected"><span class="label">Show Chart</span></div>
+        <span class="divider">|</span>
+        <div chart-option data-chart-parts="#character-counts" class="radio is-data-toggle selected"><span class="label">Show Data Set</span></div>
+        <p class="option">Time of Day Tweeting</p>
+        <div chart-option data-chart-parts="#time-of-day" class="radio"><span class="label">Show Chart</span></div>
+        <span class="divider">|</span>
+        <div chart-option data-chart-parts="#time-of-day" class="radio is-data-toggle"><span class="label">Show Data Set</span></div>
+        <p class="option">Most Used Character</p>
+        <div chart-option data-chart-parts="#most-used, #most-used-markers" class="radio"><span class="label">Show Chart</span></div>
+        <span class="divider">|</span>
+        <div chart-option data-chart-parts="#most-used, #most-used-markers" class="radio is-data-toggle"><span class="label">Show Data Set</span></div>
+        <h2>About.</h2>
+        <p class="about">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p>
+      </div>
     </div>
   </div>
 

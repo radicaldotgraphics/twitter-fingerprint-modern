@@ -4,14 +4,10 @@ require('../js/vendor/dat.gui.min.js');
 
 var $ = require('jquery'),
   utils = require('./utils'),
+  ChartOption = require('./chart-option'),
   hardCodedTwitterUserForTestingLocally = 'tylermadison',
   locStr = window.location.href.toString(),
   user = locStr.substr(locStr.indexOf('@') + 1);
-
-if (user.length) {
-  hardCodedTwitterUserForTestingLocally = user;
-  console.log(user);
-}
 
 //////////////////////////////////////////////////////////
 // CONSTANTS
@@ -96,7 +92,8 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
-  $('#character-counts').addClass('trigger');
+
+  //$('#character-counts').addClass('trigger');
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -529,76 +526,6 @@ function parseData(data) {
 
 }
 
-function setupGUI() {
-
-  var DatGUIConfig = function() {
-    this.showMerged = false;
-  };
-
-  var config = new DatGUIConfig(),
-    datGUI = new dat.GUI();
-
-  var ChartAConfig = new(function() {
-    this.chartVisible = true;
-    this.outerVisible = true;
-  });
-
-  var fA = datGUI.addFolder('Character Count');
-
-  fA.add(ChartAConfig, 'chartVisible').onChange(function(newVal) {
-    var $el = $('#character-counts');
-    if (newVal) {
-      $el.fadeIn(350);
-    } else {
-      $el.fadeOut(250);
-    }
-  });
-
-  fA.add(ChartAConfig, 'outerVisible').onChange(function(newVal) {
-    renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, newVal);
-  });
-
-  //fA.open();
-
-  var ChartBConfig = new(function() {
-    this.chartVisible = false;
-    this.outerVisible = false;
-  });
-
-  var fB = datGUI.addFolder('Time of Day');
-  fB.add(ChartBConfig, 'chartVisible').onChange(function(newVal) {
-    var $el = $('#time-of-day');
-    if (newVal) {
-      $el.fadeIn(350);
-    } else {
-      $el.fadeOut(250);
-    }
-  });
-  fB.add(ChartBConfig, 'outerVisible').onChange(function(newVal) {
-    renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, newVal);
-  });
-  //fB.open();
-
-  var ChartCConfig = new(function() {
-    this.chartVisible = false;
-    this.outerVisible = false;
-  });
-
-  var fC = datGUI.addFolder('Most Used Character');
-  fC.add(ChartCConfig, 'chartVisible').onChange(function(newVal) {
-    var $elems = $('#most-used, #most-used-markers');
-    if (newVal) {
-      $elems.fadeIn(350);
-    } else {
-      $elems.fadeOut(250);
-    }
-  });
-  fC.add(ChartCConfig, 'outerVisible').onChange(function(newVal) {
-    renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, newVal);
-  });
-  //fC.open();
-}
-
 function drawCenterX() {
   var ctx = document.getElementById('background').getContext('2d');
   ctx.font = '5pt HelveticaNeue-Light';
@@ -616,19 +543,59 @@ function addUserNameTextToBackgroundLayer() {
 }
 
 function getData() {
+  $('.chart-inner, .info').css('visibility', 'hidden');
   var promise = $.getJSON('/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
   promise.then(function(data) {
+    $('.chart-inner, .info').css('visibility', 'visible');
     parseData(data);
   });
 }
 
+function chartCallback(id, renderOuter) {
+
+  console.log(id, renderOuter);
+
+  switch (id) {
+    case '#character-counts':
+      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, renderOuter);
+      break;
+    case '#time-of-day':
+      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, renderOuter);
+      break;
+    case '#most-used, #most-used-markers':
+      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, renderOuter);
+      break;
+  }
+
+}
+
 function init() {
-  //addUserNameTextToBackgroundLayer();
-  $('.radio').on('click', function(){
-    $(this).toggleClass('selected');
+  var self = this;
+  // Init the radio options
+  $('[chart-option]').each(function() {
+    var chartOption = new ChartOption($(this), chartCallback);
   });
-  setupGUI();
-  getData();
+
+  var $userInput = $('.user-name');
+
+  if (user.length && locStr.indexOf('@') > 0) {
+    hardCodedTwitterUserForTestingLocally = user;
+    console.log(user);
+    $userInput.val(hardCodedTwitterUserForTestingLocally);
+    getData();
+  }
+
+  $('.user-submit').on('click', getData.bind(this));
+
+  $(document).on('keyup', function(e) {
+
+    $('.chart-inner').css('visibility', 'visible');
+    if (e.keyCode === 13 && $userInput.is(':focus')) {
+      hardCodedTwitterUserForTestingLocally = $userInput.val();
+      getData();
+    }
+  });
 }
 
 $(init);
+
