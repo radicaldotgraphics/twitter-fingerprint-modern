@@ -6,7 +6,7 @@ var express = require('express'),
   serverport = 5000;
 
 // Include the Twitter module
-var Twitter = require('../api/Twitter');
+var Twitter = require('./api/Twitter');
 
 var twitterConfig = {
   "consumerKey": "W8Ag86YUwL7VqqugyEX7ggTrI",
