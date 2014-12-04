@@ -111,29 +111,41 @@ var Point = function(x, y) {
 };
 
 function drawHighPointRect(point, ctx) {
-    var rW = 4,
-      rH = 4;
+  var rW = 3.5,
+    rH = 3.5;
 
-    ctx.beginPath();
-    ctx.strokeStyle = Colors.PINK;
-    ctx.fillStyle = Colors.WHITE;
-    ctx.lineWidth = 1;
-    ctx.moveTo(point.x - rW, point.y - rH);
-    ctx.lineTo(point.x + rW, point.y - rH);
-    ctx.lineTo(point.x + rW, point.y + rH);
-    ctx.lineTo(point.x - rW, point.y + rH);
-    /*    ctx.lineTo(point.x + rW, point.y + 3);
-        ctx.lineTo(point.x + rW, point.y + 6);*/
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-  }
-  /**
-   * Renders the char count per tweet chart
-   * @param  {Object} ctx canvas 2d context object
-   * @param  {Object} dataObj data hash of values to plot against
-   * @param  {Boolean} renderOutlineMarkers should we draw the map with the outline indicators
-   */
+  ctx.beginPath();
+  ctx.strokeStyle = Colors.PINK;
+  ctx.fillStyle = Colors.WHITE;
+  ctx.lineWidth = 1;
+  ctx.moveTo(point.x - rW, point.y - rH);
+  ctx.lineTo(point.x + rW, point.y - rH);
+  ctx.lineTo(point.x + rW, point.y + rH);
+  ctx.lineTo(point.x - rW, point.y + rH);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawHighPointCirc(point, ctx) {
+  var radius = 4;
+
+  ctx.beginPath();
+  ctx.strokeStyle = Colors.BRIGHT_BLUE;
+  ctx.fillStyle = Colors.WHITE;
+  ctx.lineWidth = 0.25;
+  ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+}
+
+/**
+ * Renders the char count per tweet chart
+ * @param  {Object} ctx canvas 2d context object
+ * @param  {Object} dataObj data hash of values to plot against
+ * @param  {Boolean} renderOutlineMarkers should we draw the map with the outline indicators
+ */
 function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   var numPoints = Object.keys(dataObj).length,
     angleIncrement = (360 / numPoints),
@@ -344,6 +356,9 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
     minOffset = 45; // Inner circle
 
+  var highestVal = -1,
+    highestPoint = null;
+
   var mostUsedCtx = document.getElementById('most-used-markers').getContext('2d');
   mostUsedCtx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
@@ -385,6 +400,11 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
         markers.push(new Point(lastX, lastY));
       }
     }
+
+    if (amount > highestVal) {
+      highestVal = amount;
+      highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
+    }
   }
 
   ctx.closePath();
@@ -394,6 +414,9 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.fillStyle = Colors.GRAY;
   ctx.beginPath();
+
+
+  drawHighPointCirc(highestPoint, ctx);
 
   if (renderOutlines) {
     for (var i = 0; i < chars.length; i++) {
@@ -674,7 +697,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_28c7b024.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_f08c56fa.js","/")
 },{"../js/vendor/dat.gui.min.js":4,"./chart-option":1,"./utils":3,"Wb8Gej":8,"buffer":5,"jquery":9}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
