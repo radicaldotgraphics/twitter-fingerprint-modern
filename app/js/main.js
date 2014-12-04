@@ -54,12 +54,30 @@ var Point = function(x, y) {
   this.y = y || 0;
 };
 
-/**
- * Renders the char count per tweet chart
- * @param  {Object} ctx canvas 2d context object
- * @param  {Object} dataObj data hash of values to plot against
- * @param  {Boolean} renderOutlineMarkers should we draw the map with the outline indicators
- */
+function drawHighPointRect(point, ctx) {
+    var rW = 4,
+      rH = 4;
+
+    ctx.beginPath();
+    ctx.strokeStyle = Colors.PINK;
+    ctx.fillStyle = Colors.WHITE;
+    ctx.lineWidth = 1;
+    ctx.moveTo(point.x - rW, point.y - rH);
+    ctx.lineTo(point.x + rW, point.y - rH);
+    ctx.lineTo(point.x + rW, point.y + rH);
+    ctx.lineTo(point.x - rW, point.y + rH);
+    /*    ctx.lineTo(point.x + rW, point.y + 3);
+        ctx.lineTo(point.x + rW, point.y + 6);*/
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+  /**
+   * Renders the char count per tweet chart
+   * @param  {Object} ctx canvas 2d context object
+   * @param  {Object} dataObj data hash of values to plot against
+   * @param  {Boolean} renderOutlineMarkers should we draw the map with the outline indicators
+   */
 function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   var numPoints = Object.keys(dataObj).length,
     angleIncrement = (360 / numPoints),
@@ -68,6 +86,9 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
     mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
     minOffset = 40,
     charCountLines = [];
+
+  var highestVal = -1,
+    highestPoint = null;
 
   // Clear out canvas
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
@@ -87,11 +108,20 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
       end: endPoint
     });
 
+    if (amount > highestVal) {
+      highestVal = amount;
+      highestPoint = endPoint;
+    }
+
     i++;
   }
 
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
+
+  setTimeout(function() {
+    drawHighPointRect(highestPoint, ctx);
+  }, 1000);
 
   //$('#character-counts').addClass('trigger');
 
@@ -389,28 +419,16 @@ function drawLines(lines, lineWidth, color, ctx) {
     throw new Error('Main: drawLines method: must pass a canvas element context 2d');
   }
 
-  //ctx.strokeStyle = color || Colors.GREEN;
-  //ctx.lineWidth = lineWidth || 1;
-  //ctx.beginPath();
-
   for (var i = 0; i < lines.length; i++) {
-    var line = lines[i];
-    //ctx.moveTo(line.start.x, line.start.y);
-    //ctx.lineTo(line.end.x, line.end.y);
-    animateLine(line, lineWidth, color, ctx);
+    animateLine(lines[i], lineWidth, color, ctx);
   }
 
-  //ctx.stroke();
-  //ctx.closePath();
-
-  //console.log('drawing line to:', line.start.x, line.start.y, ' to: ', line.end.x, line.end.y);
 }
 
 function drawMarkers(points, ctx) {
 
   for (var i = 0; i < points.length; i++) {
     var point = points[i];
-    //console.log('drawing point', point.x, point.y);
     ctx.beginPath();
     ctx.strokeStyle = Colors.BRIGHT_BLUE;
     ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
