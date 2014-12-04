@@ -147,7 +147,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   if (renderOutlineMarkers) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 205,
+      var circRadius = 202,
         angleStep = (angleIncrement * i - 90),
         angleXRad = Math.cos(angleStep * rad),
         angleYRad = Math.sin(angleStep * rad),
@@ -560,8 +560,8 @@ function parseData(data) {
 
   // Render time of day chart to the timeof day canvas element
   renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
+  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
+  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
 
   $('#time-of-day, #most-used, #most-used-markers').hide();
 
