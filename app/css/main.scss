@@ -191,7 +191,7 @@ body {
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 568px) {
   body {
     .dg.ac {
       display: none;
@@ -222,5 +222,9 @@ body {
   }
   .user-name {
     width: 95%;
+  }
+  .chart-inner {
+    height: 0;
+    padding-bottom: 125%;
   }
 }
