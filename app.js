@@ -1,7 +1,5 @@
 // Modules for webserver and livereload
 var express = require('express'),
-  /*  refresh = require('gulp-livereload'),
-    livereload = require('connect-livereload'),*/
   path = require('path'),
   livereloadport = 35729,
   serverport = 5000;
@@ -21,14 +19,6 @@ var server = express();
 server.set('port', process.env.PORT || 3000);
 
 var router = express.Router();
-
-//var http = require('http');
-
-//var appServer = http.createServer(server);
-// Add live reload
-/*server.use(livereload({
-  port: livereloadport
-}));*/
 
 server.get('/api/timeline', function(req, res, next) {
 
@@ -59,11 +49,4 @@ server.get('/:username', router);
 server.listen(server.get('port'), function() {
   console.log('Express server listening on port ' + server.get('port'), __dirname);
 });
-
-/*module.exports = {
-  server: server,
-  refresh: refresh,
-  livereloadport: livereloadport,
-  serverport: serverport
-};*/
 

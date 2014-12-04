@@ -116,7 +116,7 @@ Twitter.prototype.doRequest = function (url, error, success) {
 
 Twitter.prototype.doPost = function (url, post_body, error, success) {
 
-    //(url, oauth_token, oauth_token_secret, post_body, post_content_type, callback 
+    //(url, oauth_token, oauth_token_secret, post_body, post_content_type, callback
     this.oauth.post(url, this.accessToken, this.accessTokenSecret, post_body, "application/x-www-form-urlencoded", function (err, body, response) {
         console.log('URL [%s]', url);
         if (!err && response.statusCode == 200) {
