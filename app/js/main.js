@@ -616,7 +616,7 @@ function init() {
   var self = this;
 
   $('canvas').each(function(i, canvasEl) {
-    canvasEl.getContext('2d').scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    canvasEl.getContext('2d').scale(2, 2);
   });
 
   // Init the radio options
