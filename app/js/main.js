@@ -39,6 +39,10 @@ var TextAlign = {
   RIGHT: 'right'
 }
 
+var activeChartIndx = 0;
+
+var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
+
 // TODO: add canvas element names as constants
 // var CanvasClassIds = {}
 
@@ -563,7 +567,7 @@ function parseData(data) {
   renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
   renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
 
-  $('#time-of-day, #most-used, #most-used-markers').hide();
+  //$('#time-of-day, #most-used, #most-used-markers').hide();
 
   renderTmpl({
     numTweets: data.tweets.length,
@@ -575,6 +579,18 @@ function parseData(data) {
 
   drawCenterX();
 
+  showChart();
+}
+
+function showChart() {
+
+  $('canvas, .stat, .btn-toggle').removeClass('active');
+
+  $(canvasIds[activeChartIndx]).addClass('active');
+  $(canvasIds[activeChartIndx]).addClass('active');
+  $('.btn-toggle').eq(activeChartIndx).addClass('active');
+  $('.stat').eq(activeChartIndx).addClass('active');
+  $('#top-layer').addClass('active');
 }
 
 /**
@@ -601,7 +617,7 @@ function renderTmpl(obj) {
 }
 
 function drawCenterX() {
-  var ctx = document.getElementById('background').getContext('2d');
+  var ctx = document.getElementById('top-layer').getContext('2d');
   ctx.font = '5pt HelveticaNeue-Light';
   ctx.fillStyle = '#76787A';
   ctx.textAlign = TextAlign.CENTER;
@@ -625,7 +641,7 @@ function getData() {
   });
 }
 
-function chartCallback(id, renderOuter) {
+/*function chartCallback(id, renderOuter) {
 
   console.log(id, renderOuter);
 
@@ -641,7 +657,7 @@ function chartCallback(id, renderOuter) {
       break;
   }
 
-}
+}*/
 
 function init() {
   var self = this;
@@ -651,9 +667,9 @@ function init() {
   });
 
   // Init the radio options
-  $('[chart-option]').each(function() {
-    var chartOption = new ChartOption($(this), chartCallback);
-  });
+  /*  $('[chart-option]').each(function() {
+      var chartOption = new ChartOption($(this), chartCallback);
+    });*/
 
   var $userInput = $('.user-name');
 
@@ -665,6 +681,12 @@ function init() {
   }
 
   $('.user-submit').on('click', getData.bind(this));
+
+  // Bind to buttons
+  $('.btn-toggle').on('click', function() {
+    activeChartIndx = $(this).index();
+    showChart();
+  });
 
   $(document).on('keyup', function(e) {
 

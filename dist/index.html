@@ -31,17 +31,19 @@
       </div>
       <div class="info">
         <p class="tweet-count" t-binding>Last {numTweets} Tweets</p>
-        <p class="stat time-of-day">Most active at
-          <span class="most-active" t-binding>{mostActiveTime}</span>
-          <span class="divider"></span>Least active at
-          <span class="least-active" t-binding>{leastActiveTime}</span>
-        </p>
-        <p class="stat tweet-length">Average Tweet length
-          <span t-binding>{averageTweetLength} characters</span>
-        </p>
-        <p class="stat most-used">Most used character
-          <span t-binding>{mostUsedCharacter}</span>
-        </p>
+        <div class="stat-wrap">
+          <p class="stat time-of-day">Most active at
+            <span class="most-active" t-binding>{mostActiveTime}</span>
+            <span class="divider"></span>Least active at
+            <span class="least-active" t-binding>{leastActiveTime}</span>
+          </p>
+          <p class="stat tweet-length">Average Tweet length
+            <span t-binding>{averageTweetLength} characters</span>
+          </p>
+          <p class="stat most-used">Most used character
+            <span t-binding>{mostUsedCharacter}</span>
+          </p>
+        </div>
         <div class="btn-wrap">
           <div class="btn-toggle time">
             <div class="grphx"></div>
@@ -57,32 +59,6 @@
             <span>character frequency</span>
           </div>
         </div>
-        <!--
-        <p class="option">Tweet Character Count</p>
-        <div chart-option data-chart-parts="#character-counts" class="radio selected">
-          <span class="label">Show Chart</span>
-        </div>
-        <span class="divider">|</span>
-        <div chart-option data-chart-parts="#character-counts" class="radio is-data-toggle selected">
-          <span class="label">Show Data Set</span>
-        </div>
-        <p class="option">Time of Day Tweeting</p>
-        <div chart-option data-chart-parts="#time-of-day" class="radio">
-          <span class="label">Show Chart</span>
-        </div>
-        <span class="divider">|</span>
-        <div chart-option data-chart-parts="#time-of-day" class="radio is-data-toggle selected">
-          <span class="label">Show Data Set</span>
-        </div>
-        <p class="option">Most Used Character</p>
-        <div chart-option data-chart-parts="#most-used, #most-used-markers" class="radio">
-          <span class="label">Show Chart</span>
-        </div>
-        <span class="divider">|</span>
-        <div chart-option data-chart-parts="#most-used, #most-used-markers" class="radio is-data-toggle selected">
-          <span class="label">Show Data Set</span>
-        </div>
-        -->
         <h2>About.</h2>
         <p class="about">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p>
         <footer>
@@ -92,10 +68,7 @@
         </footer>
       </div>
     </div>
-
   </div>
-
-
   <script src="/js/bundle.js"></script>
 </body>
 
