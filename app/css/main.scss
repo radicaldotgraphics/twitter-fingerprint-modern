@@ -21,27 +21,104 @@ body {
 
 .chart {
   position: relative;
-  max-width: 500px;
+  max-width: 600px;
   padding-top: 10px;
-  //top: 50.1%;
   margin: auto;
-  /*   transform-style: preserve-3d;
-    transform: translateY(-50.1%); // this is making the canvas blurry */
   height: 70%;
   display: block;
+  h1 {
+    max-width: 500px;
+    margin: 20px auto 20px auto;
+  }
+}
+
+.tweet-count {
+  color: #99aab4;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 1.0em;
+}
+
+.stat {
+  text-align: center;
+  font-size: 1.3em;
+  margin-top: 15px;
+  color: #EC0972;
+  span {
+    color: white;
+    &.divider {
+      color: #00ff00;
+    }
+  }
+}
+
+.btn-wrap {
+  margin: 0 auto;
+  max-width: 500px;
+  position: relative;
+  margin-top: 20px;
+}
+
+.btn-toggle {
+  position: relative;
+  width: 114px;
+  height: 145px;
+  text-decoration: none;
+  text-transform: uppercase;
+  display: inline-block;
+  text-align: center;
+  font-size: 1.1em;
+  color: #186075;
+  margin-right: 73px;
+  line-height: 1.1em;
+  &:last-child {
+    margin-right: 0;
+  }
+  span {
+    line-height: 12px;
+  }
+  &.time {}
+  &.length {}
+  &.freq {}
+  .grphx {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(54, 73, 84);
+    border-radius: 100%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+  }
 }
 
 .chart-inner {
   position: relative;
-  height: 650px;
+  height: 538px;
   visibility: hidden;
   &.active {
     visibility: visible;
   }
 }
 
+// Data binding stuff
+[t-binding] {
+  visibility: hidden !important;
+}
+
+footer {
+  height: 50px;
+  margin-bottom: 100px;
+  display: block;
+}
+
+footer a {
+  float: right;
+  display: inline-block;
+}
+
 .input-wrap {
   position: relative;
+  margin: 0 auto;
+  max-width: 500px;
 }
 
 .user-name {
@@ -79,8 +156,8 @@ body {
   float: left;
   margin: 0;
   padding: 0;
-  width: 500px;
-  height: 650px;
+  width: 600px;
+  height: 538px;
   z-index: 0;
   &.merged {
     position: absolute;
@@ -173,7 +250,12 @@ body {
 }
 
 .info {
+  max-width: 500px;
+  margin: 0 auto;
   visibility: hidden;
+  h2 {
+    font-size: 1.7em;
+  }
   &.active {
     visibility: visible;
   }
@@ -182,7 +264,9 @@ body {
 .about {
   color: #99aab4;
   line-height: 1.7em;
-  margin-bottom: 100px;
+  margin-bottom: 50px;
+  max-width: 500px;
+  font-size: 0.9em;
 }
 
 @media (max-width: 568px) {
@@ -209,6 +293,6 @@ body {
   }
   .chart-inner {
     height: 0;
-    padding-bottom: 125%;
+    padding-bottom: 100%;
   }
 }

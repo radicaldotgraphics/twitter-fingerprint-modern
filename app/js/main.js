@@ -14,11 +14,11 @@ var $ = require('jquery'),
 
 // Common draw variables
 var DrawConfig = {
-  CANVAS_WIDTH: 500,
-  CANVAS_HEIGHT: 650,
-  RADIUS: 335,
-  CENTER_X: 250,
-  CENTER_Y: 325
+  CANVAS_WIDTH: 600,
+  CANVAS_HEIGHT: 600,
+  RADIUS: 360,
+  CENTER_X: 300,
+  CENTER_Y: 275
 };
 
 // Common colors store
@@ -147,7 +147,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   if (renderOutlineMarkers) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 202,
+      var circRadius = 210,
         angleStep = (angleIncrement * i - 90),
         angleXRad = Math.cos(angleStep * rad),
         angleYRad = Math.sin(angleStep * rad),
@@ -253,7 +253,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   if (renderOutlines) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 180,
+      var circRadius = 190,
         angleStep = (angleIncrement * i - 75),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
         yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
@@ -366,7 +366,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   if (renderOutlines) {
     for (var i = 0; i < chars.length; i++) {
-      var circRadius = 225,
+      var circRadius = 235,
         angleStep = (angleIncrement * i - 90),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
         yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
@@ -565,8 +565,39 @@ function parseData(data) {
 
   $('#time-of-day, #most-used, #most-used-markers').hide();
 
+  renderTmpl({
+    numTweets: data.tweets.length,
+    mostActiveTime: '11:00 PM',
+    leastActiveTime: '4:00 AM',
+    averageTweetLength: 120,
+    mostUsedCharacter: 'E (' + 240 + ') times'
+  });
+
   drawCenterX();
 
+}
+
+/**
+ * Simple template data bindings only works with nums and strings
+ * @param  {Object} obj data object to use props off
+ * @return {[type]}     [description]
+ */
+function renderTmpl(obj) {
+  $('[t-binding]').each(function(indx, el) {
+    var $boundEl = $(this),
+      token = $boundEl.html(),
+      prop = undefined,
+      start = token.indexOf('{') + 1,
+      end = token.lastIndexOf('}');
+
+    prop = token.substr(start, end - start);
+
+    if (obj[prop] !== undefined) {
+      $boundEl.html(token.replace(/\{(.+)\}/g, obj[prop]))
+        .removeAttr('t-binding');
+    }
+
+  });
 }
 
 function drawCenterX() {
