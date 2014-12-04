@@ -670,6 +670,11 @@ function chartCallback(id, renderOuter) {
 
 function init() {
   var self = this;
+
+  $('canvas').each(function(i, canvasEl) {
+    canvasEl.getContext('2d').scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  });
+
   // Init the radio options
   $('[chart-option]').each(function() {
     var chartOption = new ChartOption($(this), chartCallback);
@@ -699,7 +704,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_a4c8a9bc.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_a505466c.js","/")
 },{"../js/vendor/dat.gui.min.js":4,"./chart-option":1,"./utils":3,"Wb8Gej":8,"buffer":5,"jquery":9}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

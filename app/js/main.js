@@ -614,6 +614,11 @@ function chartCallback(id, renderOuter) {
 
 function init() {
   var self = this;
+
+  $('canvas').each(function(i, canvasEl) {
+    canvasEl.getContext('2d').scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  });
+
   // Init the radio options
   $('[chart-option]').each(function() {
     var chartOption = new ChartOption($(this), chartCallback);
