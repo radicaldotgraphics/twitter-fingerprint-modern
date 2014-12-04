@@ -95,7 +95,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180,
     i = 0,
-    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
+    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.45),
     minOffset = 40,
     charCountLines = [];
 
@@ -147,7 +147,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   if (renderOutlineMarkers) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 222,
+      var circRadius = 205,
         angleStep = (angleIncrement * i - 90),
         angleXRad = Math.cos(angleStep * rad),
         angleYRad = Math.sin(angleStep * rad),
@@ -366,7 +366,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   if (renderOutlines) {
     for (var i = 0; i < chars.length; i++) {
-      var circRadius = 222,
+      var circRadius = 225,
         angleStep = (angleIncrement * i - 90),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
         yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
