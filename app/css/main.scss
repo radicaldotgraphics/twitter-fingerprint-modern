@@ -99,6 +99,15 @@ body {
     color: white;
     .grphx {
       background-color: rgba(30, 43, 51, 1);
+      .time {
+        background-position: 0 -72px;
+      }
+      .length {
+        background-position: 0 -72px;
+      }
+      .freq {
+        background-position: 0 -72px;
+      }
     }
   }
   &:last-child {
@@ -107,10 +116,8 @@ body {
   span {
     line-height: 12px;
   }
-  &.time {}
-  &.length {}
-  &.freq {}
   .grphx {
+    position: relative;
     width: 100px;
     height: 100px;
     background-color: transparent;
@@ -118,6 +125,34 @@ body {
     margin: 0 auto;
     margin-bottom: 10px;
     border: 2px solid rgba(54, 71, 81, 1);
+    transition: background-color 0.15s ease-out;
+    .time {
+      width: 72px;
+      height: 72px;
+      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
+      display: inline-block;
+      position: absolute;
+      left: 14px;
+      top: 14px;
+    }
+    .length {
+      width: 72px;
+      height: 72px;
+      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
+      display: inline-block;
+      position: absolute;
+      left: 14px;
+      top: 14px;
+    }
+    .freq {
+      width: 72px;
+      height: 72px;
+      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
+      display: inline-block;
+      position: absolute;
+      left: 14px;
+      top: 14px;
+    }
   }
 }
 
@@ -129,13 +164,6 @@ body {
   &.active {
     visibility: visible;
   }
-}
-
-// Data binding stuff
-[t-binding] {}
-
-[t-hide] {
-  visibility: hidden !important;
 }
 
 footer {
@@ -298,7 +326,7 @@ footer a {
   line-height: 1.7em;
   margin-bottom: 50px;
   max-width: 500px;
-  font-size: 0.9em;
+  font-size: 15px;
 }
 
 @media (max-width: 568px) {

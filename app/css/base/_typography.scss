@@ -1,10 +1,53 @@
-html {
-  background-color: #000000;
+@font-face {
+  font-family: 'AauxProLight';
+  src: url("/fonts/AauxProLight.eot");
+  src: url("/fonts/AauxProLight.eot?iefix") format("eot"), url("/fonts/AauxProLight.woff") format("woff"), url("/fonts/AauxProLight.ttf") format("truetype"), url("/fonts/AauxProLight.svg#<fontname>") format("svg");
+  font-style: normal;
+  font-weight: normal;
 }
 
+
+@font-face {
+  font-family: 'AauxProBold';
+  src: url("/fonts/AauxProBold.eot");
+  src: url("/fonts/AauxProBold.eot?iefix") format("eot"), url("/fonts/AauxProBold.woff") format("woff"), url("/fonts/AauxProBold.ttf") format("truetype"), url("/fonts/AauxProBold.svg#<fontname>") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
+
+
+@font-face {
+  font-family: 'AauxProRegular';
+  src: url("/fonts/AauxProRegular.eot");
+  src: url("/fonts/AauxProRegular.eot?iefix") format("eot"), url("/fonts/AauxProRegular.woff") format("woff"), url("/fonts/AauxProRegular.ttf") format("truetype"), url("/fonts/AauxProRegular.svg#<fontname>") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
+
+
+@font-face {
+  font-family: 'AauxProMedium';
+  src: url("/fonts/AauxProMedium.eot");
+  src: url("/fonts/AauxProMedium.eot?iefix") format("eot"), url("/fonts/AauxProMedium.woff") format("woff"), url("/fonts/AauxProMedium.ttf") format("truetype"), url("/fonts/AauxProMedium.svg#<fontname>") format("svg");
+  font-style: normal;
+  font-weight: normal;
+}
+
+
 body {
-  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
-  font-weight: 300;
+  font-family: 'AauxProRegular';
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'AauxProLight';
+}
+
+p, span, li, ol, a, input {
+  font-family: 'AauxProRegular';
+}
+
+html {
+  background-color: #000000;
 }
 
 a {
@@ -18,7 +61,7 @@ a:visited {
 }
 
 p {
-  font-size: 14px;
+  font-size: 16px;
   margin: 0;
   padding: 0;
   letter-spacing: 0.4px;
