@@ -4,6 +4,7 @@ var Handlebars = require('../js/vendor/handlebars-v2.0.0.js');
 
 var $ = require('jquery'),
   utils = require('./utils'),
+  Easing = require('./vendor/easing'),
   ChartOption = require('./chart-option'),
   userName = 'tylermadison',
   locStr = window.location.href.toString(),
@@ -51,7 +52,7 @@ var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-ma
 
 // When data parses store in hash
 var models = {};
-
+var charCountHighPoint = null;
 var renderedIndividually = false;
 
 // Convenience cartesian point object
@@ -132,7 +133,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
     if (amount > highestVal) {
       highestVal = amount;
-      highestPoint = endPoint;
+      highestPoint = charCountHighPoint = endPoint;
     }
 
     i++;
@@ -141,11 +142,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
 
-  setTimeout(function() {
-    drawHighPointRect(highestPoint, ctx);
-  }, 1250);
-
-  //$('#character-counts').addClass('trigger');
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -236,14 +232,20 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   }
 
   // Animation loop function
-  var scale = 0.001;
+
+  var iteration = 25,
+    totalIterations = 210,
+    easingValue;
+
   function animate() {
-    var i = 0;
-    var points = [];
+    var i = 0,
+      points = [];
+    easingValue = Easing.easeInOutExpo(iteration, 0, 1, totalIterations);
+
     for (var key in dataObj) {
       var amount = dataObj[key],
         angleStep = (angleIncrement * i - angleOffset),
-        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+        pt = new Point(((mult * easingValue) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * easingValue) * amount + minOffset) * Math.sin(angleStep * rad));
 
       points.push(pt);
       i++;
@@ -251,11 +253,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 
     drawPoly(points, ctx, Colors.TIME_OF_DAY_FILL);
 
-    if (scale < 1) {
-      scale *= 1.1;
-      if (scale > 1) {
-        scale = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
     } else {
       drawTrianlgeMarker(highestPoint, ctx);
@@ -300,23 +299,27 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 }
 
 function animateLine(line, lineWidth, color, ctx) {
-  var speed = 0.00012;
+
+  var iteration = 0,
+    totalIterations = 45,
+    easingValue;
 
   function animate() {
+    easingValue = Easing.easeInCirc(iteration, 0, 1, totalIterations);
+
     ctx.strokeStyle = color || Colors.GREEN;
     ctx.lineWidth = lineWidth || 1;
     ctx.beginPath();
     ctx.moveTo(line.start.x, line.start.y);
-    ctx.lineTo(line.start.x + speed * (line.end.x - line.start.x), line.start.y + speed * (line.end.y - line.start.y));
+    ctx.lineTo(line.start.x + easingValue * (line.end.x - line.start.x), line.start.y + easingValue * (line.end.y - line.start.y));
     ctx.stroke();
     ctx.closePath();
 
-    if (speed < 1) {
-      speed *= 1.2;
-      if (speed > 1) {
-        speed = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
+    }else if(line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y){
+      drawHighPointRect(line.end, ctx);
     }
 
   }
@@ -381,28 +384,33 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
   }
 
   // Animation loop function
-  var scale = 0.001;
+  var iteration = 25,
+    totalIterations = 200,
+    easingValue;
+
   function animate() {
     var points = [];
+
+    easingValue = Easing.easeInOutExpo(iteration, 0, 1, totalIterations);
+
     for (var i = 0; i < chars.length; i++) {
       var amount = dataObj[chars[i]] || 0,
         angleStep = (angleIncrement * i - 90),
-        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+        pt = new Point(((mult * easingValue) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * easingValue) * amount + minOffset) * Math.sin(angleStep * rad));
+
       points.push(pt);
     }
 
     drawPoly(points, ctx, Colors.MOST_USED_FILL);
 
-    if (scale < 1) {
-      scale *= 1.1;
-      if (scale > 1) {
-        scale = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
     } else {
       drawMarkers(markers, mostUsedCtx);
       drawHighPointCirc(highestPoint, ctx);
     }
+
   }
 
   if (renderOutlines) {
@@ -460,10 +468,21 @@ function drawLines(lines, lineWidth, color, ctx) {
     throw new Error('Main: drawLines method: must pass a canvas element context 2d');
   }
 
-  for (var i = 0; i < lines.length; i++) {
-    animateLine(lines[i], lineWidth, color, ctx);
+  var delay = 0,
+    i = 0;
+
+  var delayedCb = function() {
+    setTimeout(function() {
+      animateLine(lines[i], lineWidth, color, ctx);
+      if (i < lines.length - 1) {
+        delay += 0.1;
+        delayedCb();
+        i++;
+      }
+    }, delay);
   }
 
+  delayedCb();
 }
 
 function drawMarkers(points, ctx) {

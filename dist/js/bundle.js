@@ -52,7 +52,7 @@ module.exports = ChartOption;
 
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/chart-option.js","/")
-},{"Wb8Gej":8,"buffer":5,"jquery":9}],2:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6,"jquery":10}],2:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -60,6 +60,7 @@ var Handlebars = require('../js/vendor/handlebars-v2.0.0.js');
 
 var $ = require('jquery'),
   utils = require('./utils'),
+  Easing = require('./vendor/easing'),
   ChartOption = require('./chart-option'),
   userName = 'tylermadison',
   locStr = window.location.href.toString(),
@@ -107,7 +108,7 @@ var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-ma
 
 // When data parses store in hash
 var models = {};
-
+var charCountHighPoint = null;
 var renderedIndividually = false;
 
 // Convenience cartesian point object
@@ -188,7 +189,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
     if (amount > highestVal) {
       highestVal = amount;
-      highestPoint = endPoint;
+      highestPoint = charCountHighPoint = endPoint;
     }
 
     i++;
@@ -197,11 +198,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
 
-  setTimeout(function() {
-    drawHighPointRect(highestPoint, ctx);
-  }, 1250);
-
-  //$('#character-counts').addClass('trigger');
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -292,14 +288,20 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   }
 
   // Animation loop function
-  var scale = 0.001;
+
+  var iteration = 25,
+    totalIterations = 210,
+    easingValue;
+
   function animate() {
-    var i = 0;
-    var points = [];
+    var i = 0,
+      points = [];
+    easingValue = Easing.easeInOutExpo(iteration, 0, 1, totalIterations);
+
     for (var key in dataObj) {
       var amount = dataObj[key],
         angleStep = (angleIncrement * i - angleOffset),
-        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+        pt = new Point(((mult * easingValue) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * easingValue) * amount + minOffset) * Math.sin(angleStep * rad));
 
       points.push(pt);
       i++;
@@ -307,11 +309,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 
     drawPoly(points, ctx, Colors.TIME_OF_DAY_FILL);
 
-    if (scale < 1) {
-      scale *= 1.1;
-      if (scale > 1) {
-        scale = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
     } else {
       drawTrianlgeMarker(highestPoint, ctx);
@@ -356,23 +355,27 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 }
 
 function animateLine(line, lineWidth, color, ctx) {
-  var speed = 0.00012;
+
+  var iteration = 0,
+    totalIterations = 45,
+    easingValue;
 
   function animate() {
+    easingValue = Easing.easeInCirc(iteration, 0, 1, totalIterations);
+
     ctx.strokeStyle = color || Colors.GREEN;
     ctx.lineWidth = lineWidth || 1;
     ctx.beginPath();
     ctx.moveTo(line.start.x, line.start.y);
-    ctx.lineTo(line.start.x + speed * (line.end.x - line.start.x), line.start.y + speed * (line.end.y - line.start.y));
+    ctx.lineTo(line.start.x + easingValue * (line.end.x - line.start.x), line.start.y + easingValue * (line.end.y - line.start.y));
     ctx.stroke();
     ctx.closePath();
 
-    if (speed < 1) {
-      speed *= 1.2;
-      if (speed > 1) {
-        speed = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
+    }else if(line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y){
+      drawHighPointRect(line.end, ctx);
     }
 
   }
@@ -437,28 +440,33 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
   }
 
   // Animation loop function
-  var scale = 0.001;
+  var iteration = 25,
+    totalIterations = 200,
+    easingValue;
+
   function animate() {
     var points = [];
+
+    easingValue = Easing.easeInOutExpo(iteration, 0, 1, totalIterations);
+
     for (var i = 0; i < chars.length; i++) {
       var amount = dataObj[chars[i]] || 0,
         angleStep = (angleIncrement * i - 90),
-        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+        pt = new Point(((mult * easingValue) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * easingValue) * amount + minOffset) * Math.sin(angleStep * rad));
+
       points.push(pt);
     }
 
     drawPoly(points, ctx, Colors.MOST_USED_FILL);
 
-    if (scale < 1) {
-      scale *= 1.1;
-      if (scale > 1) {
-        scale = 1;
-      }
+    if (iteration < totalIterations) {
+      iteration++;
       requestAnimationFrame(animate);
     } else {
       drawMarkers(markers, mostUsedCtx);
       drawHighPointCirc(highestPoint, ctx);
     }
+
   }
 
   if (renderOutlines) {
@@ -516,10 +524,21 @@ function drawLines(lines, lineWidth, color, ctx) {
     throw new Error('Main: drawLines method: must pass a canvas element context 2d');
   }
 
-  for (var i = 0; i < lines.length; i++) {
-    animateLine(lines[i], lineWidth, color, ctx);
+  var delay = 0,
+    i = 0;
+
+  var delayedCb = function() {
+    setTimeout(function() {
+      animateLine(lines[i], lineWidth, color, ctx);
+      if (i < lines.length - 1) {
+        delay += 0.1;
+        delayedCb();
+        i++;
+      }
+    }, delay);
   }
 
+  delayedCb();
 }
 
 function drawMarkers(points, ctx) {
@@ -750,8 +769,8 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_bbb68b9c.js","/")
-},{"../js/vendor/handlebars-v2.0.0.js":4,"./chart-option":1,"./utils":3,"Wb8Gej":8,"buffer":5,"jquery":9}],3:[function(require,module,exports){
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ba7ce78c.js","/")
+},{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
 
@@ -798,7 +817,163 @@ module.exports = {
 };
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/utils.js","/")
-},{"Wb8Gej":8,"buffer":5}],4:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6}],4:[function(require,module,exports){
+(function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
+
+ /*
+ * This is a near-direct port of Robert Penner's easing equations. Please shower Robert with
+ * praise and all of your admiration. His license is provided below.
+ *
+ * For information on how to use these functions in your animations, check out:
+ * http://www.kirupa.com/html5/animating_with_easing_functions_in_javascript.htm
+ *
+ * -Kirupa
+ */
+
+
+/*
+ *
+ * TERMS OF USE - EASING EQUATIONS
+ *
+ * Open source under the BSD License.
+ *
+ * Copyright Â© 2001 Robert Penner
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this list of
+ * conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list
+ * of conditions and the following disclaimer in the documentation and/or other materials
+ * provided with the distribution.
+ *
+ * Neither the name of the author nor the names of contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+ * OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+module.exports = {
+  linearEase: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * currentIteration / totalIterations + startValue;
+  },
+
+  easeInQuad: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (currentIteration /= totalIterations) * currentIteration + startValue;
+  },
+
+  easeOutQuad: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return -changeInValue * (currentIteration /= totalIterations) * (currentIteration - 2) + startValue;
+  },
+
+  easeInOutQuad: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * currentIteration * currentIteration + startValue;
+    }
+    return -changeInValue / 2 * ((--currentIteration) * (currentIteration - 2) - 1) + startValue;
+  },
+
+  easeInCubic: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.pow(currentIteration / totalIterations, 3) + startValue;
+  },
+
+  easeOutCubic: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (Math.pow(currentIteration / totalIterations - 1, 3) + 1) + startValue;
+  },
+
+  easeInOutCubic: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * Math.pow(currentIteration, 3) + startValue;
+    }
+    return changeInValue / 2 * (Math.pow(currentIteration - 2, 3) + 2) + startValue;
+  },
+
+  easeInQuart: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.pow (currentIteration / totalIterations, 4) + startValue;
+  },
+
+  easeOutQuart: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return -changeInValue * (Math.pow(currentIteration / totalIterations - 1, 4) - 1) + startValue;
+  },
+
+  easeInOutQuart: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * Math.pow(currentIteration, 4) + startValue;
+    }
+    return -changeInValue/2 * (Math.pow(currentIteration - 2, 4) - 2) + startValue;
+  },
+
+  easeInQuint: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.pow (currentIteration / totalIterations, 5) + startValue;
+  },
+
+  easeOutQuint: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (Math.pow(currentIteration / totalIterations - 1, 5) + 1) + startValue;
+  },
+
+  easeInOutQuint: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * Math.pow(currentIteration, 5) + startValue;
+    }
+    return changeInValue / 2 * (Math.pow(currentIteration - 2, 5) + 2) + startValue;
+  },
+
+  easeInSine: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (1 - Math.cos(currentIteration / totalIterations * (Math.PI / 2))) + startValue;
+  },
+
+  easeOutSine: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.sin(currentIteration / totalIterations * (Math.PI / 2)) + startValue;
+  },
+
+  easeInOutSine: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue / 2 * (1 - Math.cos(Math.PI * currentIteration / totalIterations)) + startValue;
+  },
+
+  easeInExpo: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.pow(2, 10 * (currentIteration / totalIterations - 1)) + startValue;
+  },
+
+  easeOutExpo: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (-Math.pow(2, -10 * currentIteration / totalIterations) + 1) + startValue;
+  },
+
+  easeInOutExpo: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * Math.pow(2, 10 * (currentIteration - 1)) + startValue;
+    }
+    return changeInValue / 2 * (-Math.pow(2, -10 * --currentIteration) + 2) + startValue;
+  },
+
+  easeInCirc: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * (1 - Math.sqrt(1 - (currentIteration /= totalIterations) * currentIteration)) + startValue;
+  },
+
+  easeOutCirc: function(currentIteration, startValue, changeInValue, totalIterations) {
+    return changeInValue * Math.sqrt(1 - (currentIteration = currentIteration / totalIterations - 1) * currentIteration) + startValue;
+  },
+
+  easeInOutCirc: function(currentIteration, startValue, changeInValue, totalIterations) {
+    if ((currentIteration /= totalIterations / 2) < 1) {
+      return changeInValue / 2 * (1 - Math.sqrt(1 - currentIteration * currentIteration)) + startValue;
+    }
+    return changeInValue / 2 * (Math.sqrt(1 - (currentIteration -= 2) * currentIteration) + 1) + startValue;
+  }
+}
+
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/vendor/easing.js","/vendor")
+},{"Wb8Gej":9,"buffer":6}],5:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 
 /*!
@@ -831,7 +1006,7 @@ THE SOFTWARE.
 this.usePartial=this.usePartial||c.usePartial,this.children[d]=c;for(var e=0,f=c.depths.list.length;f>e;e++)b=c.depths.list[e],2>b||this.addDepth(b-1);return d},block:function(a){var b=a.mustache,c=a.program,d=a.inverse;c&&(c=this.compileProgram(c)),d&&(d=this.compileProgram(d));var e=b.sexpr,f=this.classifySexpr(e);"helper"===f?this.helperSexpr(e,c,d):"simple"===f?(this.simpleSexpr(e),this.opcode("pushProgram",c),this.opcode("pushProgram",d),this.opcode("emptyHash"),this.opcode("blockValue",e.id.original)):(this.ambiguousSexpr(e,c,d),this.opcode("pushProgram",c),this.opcode("pushProgram",d),this.opcode("emptyHash"),this.opcode("ambiguousBlockValue")),this.opcode("append")},hash:function(a){var b,c,d=a.pairs;for(this.opcode("pushHash"),b=0,c=d.length;c>b;b++)this.pushParam(d[b][1]);for(;b--;)this.opcode("assignToHash",d[b][0]);this.opcode("popHash")},partial:function(a){var b=a.partialName;this.usePartial=!0,a.hash?this.accept(a.hash):this.opcode("push","undefined"),a.context?this.accept(a.context):(this.opcode("getContext",0),this.opcode("pushContext")),this.opcode("invokePartial",b.name,a.indent||""),this.opcode("append")},content:function(a){a.string&&this.opcode("appendContent",a.string)},mustache:function(a){this.sexpr(a.sexpr),a.escaped&&!this.options.noEscape?this.opcode("appendEscaped"):this.opcode("append")},ambiguousSexpr:function(a,b,c){var d=a.id,e=d.parts[0],f=null!=b||null!=c;this.opcode("getContext",d.depth),this.opcode("pushProgram",b),this.opcode("pushProgram",c),this.ID(d),this.opcode("invokeAmbiguous",e,f)},simpleSexpr:function(a){var b=a.id;"DATA"===b.type?this.DATA(b):b.parts.length?this.ID(b):(this.addDepth(b.depth),this.opcode("getContext",b.depth),this.opcode("pushContext")),this.opcode("resolvePossibleLambda")},helperSexpr:function(a,b,c){var d=this.setupFullMustacheParams(a,b,c),e=a.id,f=e.parts[0];if(this.options.knownHelpers[f])this.opcode("invokeKnownHelper",d.length,f);else{if(this.options.knownHelpersOnly)throw new h("You specified knownHelpersOnly, but used the unknown helper "+f,a);e.falsy=!0,this.ID(e),this.opcode("invokeHelper",d.length,e.original,e.isSimple)}},sexpr:function(a){var b=this.classifySexpr(a);"simple"===b?this.simpleSexpr(a):"helper"===b?this.helperSexpr(a):this.ambiguousSexpr(a)},ID:function(a){this.addDepth(a.depth),this.opcode("getContext",a.depth);var b=a.parts[0];b?this.opcode("lookupOnContext",a.parts,a.falsy,a.isScoped):this.opcode("pushContext")},DATA:function(a){this.options.data=!0,this.opcode("lookupData",a.id.depth,a.id.parts)},STRING:function(a){this.opcode("pushString",a.string)},NUMBER:function(a){this.opcode("pushLiteral",a.number)},BOOLEAN:function(a){this.opcode("pushLiteral",a.bool)},comment:function(){},opcode:function(a){this.opcodes.push({opcode:a,args:j.call(arguments,1)})},addDepth:function(a){0!==a&&(this.depths[a]||(this.depths[a]=!0,this.depths.list.push(a)))},classifySexpr:function(a){var b=a.isHelper,c=a.eligibleHelper,d=this.options;if(c&&!b){var e=a.id.parts[0];d.knownHelpers[e]?b=!0:d.knownHelpersOnly&&(c=!1)}return b?"helper":c?"ambiguous":"simple"},pushParams:function(a){for(var b=0,c=a.length;c>b;b++)this.pushParam(a[b])},pushParam:function(a){this.stringParams?(a.depth&&this.addDepth(a.depth),this.opcode("getContext",a.depth||0),this.opcode("pushStringParam",a.stringModeValue,a.type),"sexpr"===a.type&&this.sexpr(a)):(this.trackIds&&this.opcode("pushId",a.type,a.idName||a.stringModeValue),this.accept(a))},setupFullMustacheParams:function(a,b,c){var d=a.params;return this.pushParams(d),this.opcode("pushProgram",b),this.opcode("pushProgram",c),a.hash?this.hash(a.hash):this.opcode("emptyHash"),d}},g.precompile=d,g.compile=e,g}(c,b),l=function(a,b){"use strict";function c(a){this.value=a}function d(){}var e,f=a.COMPILER_REVISION,g=a.REVISION_CHANGES,h=b;d.prototype={nameLookup:function(a,b){return d.isValidJavaScriptVariableName(b)?a+"."+b:a+"['"+b+"']"},depthedLookup:function(a){return this.aliases.lookup="this.lookup",'lookup(depths, "'+a+'")'},compilerInfo:function(){var a=f,b=g[a];return[a,b]},appendToBuffer:function(a){return this.environment.isSimple?"return "+a+";":{appendToBuffer:!0,content:a,toString:function(){return"buffer += "+a+";"}}},initializeBuffer:function(){return this.quotedString("")},namespace:"Handlebars",compile:function(a,b,c,d){this.environment=a,this.options=b,this.stringParams=this.options.stringParams,this.trackIds=this.options.trackIds,this.precompile=!d,this.name=this.environment.name,this.isChild=!!c,this.context=c||{programs:[],environments:[]},this.preamble(),this.stackSlot=0,this.stackVars=[],this.aliases={},this.registers={list:[]},this.hashes=[],this.compileStack=[],this.inlineStack=[],this.compileChildren(a,b),this.useDepths=this.useDepths||a.depths.list.length||this.options.compat;var e,f,g,i=a.opcodes;for(f=0,g=i.length;g>f;f++)e=i[f],this[e.opcode].apply(this,e.args);if(this.pushSource(""),this.stackSlot||this.inlineStack.length||this.compileStack.length)throw new h("Compile completed with content left on stack");var j=this.createFunctionContext(d);if(this.isChild)return j;var k={compiler:this.compilerInfo(),main:j},l=this.context.programs;for(f=0,g=l.length;g>f;f++)l[f]&&(k[f]=l[f]);return this.environment.usePartial&&(k.usePartial=!0),this.options.data&&(k.useData=!0),this.useDepths&&(k.useDepths=!0),this.options.compat&&(k.compat=!0),d||(k.compiler=JSON.stringify(k.compiler),k=this.objectLiteral(k)),k},preamble:function(){this.lastContext=0,this.source=[]},createFunctionContext:function(a){var b="",c=this.stackVars.concat(this.registers.list);c.length>0&&(b+=", "+c.join(", "));for(var d in this.aliases)this.aliases.hasOwnProperty(d)&&(b+=", "+d+"="+this.aliases[d]);var e=["depth0","helpers","partials","data"];this.useDepths&&e.push("depths");var f=this.mergeSource(b);return a?(e.push(f),Function.apply(this,e)):"function("+e.join(",")+") {\n  "+f+"}"},mergeSource:function(a){for(var b,c,d="",e=!this.forceBuffer,f=0,g=this.source.length;g>f;f++){var h=this.source[f];h.appendToBuffer?b=b?b+"\n    + "+h.content:h.content:(b&&(d?d+="buffer += "+b+";\n  ":(c=!0,d=b+";\n  "),b=void 0),d+=h+"\n  ",this.environment.isSimple||(e=!1))}return e?(b||!d)&&(d+="return "+(b||'""')+";\n"):(a+=", buffer = "+(c?"":this.initializeBuffer()),d+=b?"return buffer + "+b+";\n":"return buffer;\n"),a&&(d="var "+a.substring(2)+(c?"":";\n  ")+d),d},blockValue:function(a){this.aliases.blockHelperMissing="helpers.blockHelperMissing";var b=[this.contextName(0)];this.setupParams(a,0,b);var c=this.popStack();b.splice(1,0,c),this.push("blockHelperMissing.call("+b.join(", ")+")")},ambiguousBlockValue:function(){this.aliases.blockHelperMissing="helpers.blockHelperMissing";var a=[this.contextName(0)];this.setupParams("",0,a,!0),this.flushInline();var b=this.topStack();a.splice(1,0,b),this.pushSource("if (!"+this.lastHelper+") { "+b+" = blockHelperMissing.call("+a.join(", ")+"); }")},appendContent:function(a){this.pendingContent&&(a=this.pendingContent+a),this.pendingContent=a},append:function(){this.flushInline();var a=this.popStack();this.pushSource("if ("+a+" != null) { "+this.appendToBuffer(a)+" }"),this.environment.isSimple&&this.pushSource("else { "+this.appendToBuffer("''")+" }")},appendEscaped:function(){this.aliases.escapeExpression="this.escapeExpression",this.pushSource(this.appendToBuffer("escapeExpression("+this.popStack()+")"))},getContext:function(a){this.lastContext=a},pushContext:function(){this.pushStackLiteral(this.contextName(this.lastContext))},lookupOnContext:function(a,b,c){var d=0,e=a.length;for(c||!this.options.compat||this.lastContext?this.pushContext():this.push(this.depthedLookup(a[d++]));e>d;d++)this.replaceStack(function(c){var e=this.nameLookup(c,a[d],"context");return b?" && "+e:" != null ? "+e+" : "+c})},lookupData:function(a,b){a?this.pushStackLiteral("this.data(data, "+a+")"):this.pushStackLiteral("data");for(var c=b.length,d=0;c>d;d++)this.replaceStack(function(a){return" && "+this.nameLookup(a,b[d],"data")})},resolvePossibleLambda:function(){this.aliases.lambda="this.lambda",this.push("lambda("+this.popStack()+", "+this.contextName(0)+")")},pushStringParam:function(a,b){this.pushContext(),this.pushString(b),"sexpr"!==b&&("string"==typeof a?this.pushString(a):this.pushStackLiteral(a))},emptyHash:function(){this.pushStackLiteral("{}"),this.trackIds&&this.push("{}"),this.stringParams&&(this.push("{}"),this.push("{}"))},pushHash:function(){this.hash&&this.hashes.push(this.hash),this.hash={values:[],types:[],contexts:[],ids:[]}},popHash:function(){var a=this.hash;this.hash=this.hashes.pop(),this.trackIds&&this.push("{"+a.ids.join(",")+"}"),this.stringParams&&(this.push("{"+a.contexts.join(",")+"}"),this.push("{"+a.types.join(",")+"}")),this.push("{\n    "+a.values.join(",\n    ")+"\n  }")},pushString:function(a){this.pushStackLiteral(this.quotedString(a))},push:function(a){return this.inlineStack.push(a),a},pushLiteral:function(a){this.pushStackLiteral(a)},pushProgram:function(a){null!=a?this.pushStackLiteral(this.programExpression(a)):this.pushStackLiteral(null)},invokeHelper:function(a,b,c){this.aliases.helperMissing="helpers.helperMissing";var d=this.popStack(),e=this.setupHelper(a,b),f=(c?e.name+" || ":"")+d+" || helperMissing";this.push("(("+f+").call("+e.callParams+"))")},invokeKnownHelper:function(a,b){var c=this.setupHelper(a,b);this.push(c.name+".call("+c.callParams+")")},invokeAmbiguous:function(a,b){this.aliases.functionType='"function"',this.aliases.helperMissing="helpers.helperMissing",this.useRegister("helper");var c=this.popStack();this.emptyHash();var d=this.setupHelper(0,a,b),e=this.lastHelper=this.nameLookup("helpers",a,"helper");this.push("((helper = (helper = "+e+" || "+c+") != null ? helper : helperMissing"+(d.paramsInit?"),("+d.paramsInit:"")+"),(typeof helper === functionType ? helper.call("+d.callParams+") : helper))")},invokePartial:function(a,b){var c=[this.nameLookup("partials",a,"partial"),"'"+b+"'","'"+a+"'",this.popStack(),this.popStack(),"helpers","partials"];this.options.data?c.push("data"):this.options.compat&&c.push("undefined"),this.options.compat&&c.push("depths"),this.push("this.invokePartial("+c.join(", ")+")")},assignToHash:function(a){var b,c,d,e=this.popStack();this.trackIds&&(d=this.popStack()),this.stringParams&&(c=this.popStack(),b=this.popStack());var f=this.hash;b&&f.contexts.push("'"+a+"': "+b),c&&f.types.push("'"+a+"': "+c),d&&f.ids.push("'"+a+"': "+d),f.values.push("'"+a+"': ("+e+")")},pushId:function(a,b){"ID"===a||"DATA"===a?this.pushString(b):"sexpr"===a?this.pushStackLiteral("true"):this.pushStackLiteral("null")},compiler:d,compileChildren:function(a,b){for(var c,d,e=a.children,f=0,g=e.length;g>f;f++){c=e[f],d=new this.compiler;var h=this.matchExistingProgram(c);null==h?(this.context.programs.push(""),h=this.context.programs.length,c.index=h,c.name="program"+h,this.context.programs[h]=d.compile(c,b,this.context,!this.precompile),this.context.environments[h]=c,this.useDepths=this.useDepths||d.useDepths):(c.index=h,c.name="program"+h)}},matchExistingProgram:function(a){for(var b=0,c=this.context.environments.length;c>b;b++){var d=this.context.environments[b];if(d&&d.equals(a))return b}},programExpression:function(a){var b=this.environment.children[a],c=(b.depths.list,this.useDepths),d=[b.index,"data"];return c&&d.push("depths"),"this.program("+d.join(", ")+")"},useRegister:function(a){this.registers[a]||(this.registers[a]=!0,this.registers.list.push(a))},pushStackLiteral:function(a){return this.push(new c(a))},pushSource:function(a){this.pendingContent&&(this.source.push(this.appendToBuffer(this.quotedString(this.pendingContent))),this.pendingContent=void 0),a&&this.source.push(a)},pushStack:function(a){this.flushInline();var b=this.incrStack();return this.pushSource(b+" = "+a+";"),this.compileStack.push(b),b},replaceStack:function(a){{var b,d,e,f="";this.isInline()}if(!this.isInline())throw new h("replaceStack on non-inline");var g=this.popStack(!0);if(g instanceof c)f=b=g.value,e=!0;else{d=!this.stackSlot;var i=d?this.incrStack():this.topStackName();f="("+this.push(i)+" = "+g+")",b=this.topStack()}var j=a.call(this,b);e||this.popStack(),d&&this.stackSlot--,this.push("("+f+j+")")},incrStack:function(){return this.stackSlot++,this.stackSlot>this.stackVars.length&&this.stackVars.push("stack"+this.stackSlot),this.topStackName()},topStackName:function(){return"stack"+this.stackSlot},flushInline:function(){var a=this.inlineStack;if(a.length){this.inlineStack=[];for(var b=0,d=a.length;d>b;b++){var e=a[b];e instanceof c?this.compileStack.push(e):this.pushStack(e)}}},isInline:function(){return this.inlineStack.length},popStack:function(a){var b=this.isInline(),d=(b?this.inlineStack:this.compileStack).pop();if(!a&&d instanceof c)return d.value;if(!b){if(!this.stackSlot)throw new h("Invalid stack pop");this.stackSlot--}return d},topStack:function(){var a=this.isInline()?this.inlineStack:this.compileStack,b=a[a.length-1];return b instanceof c?b.value:b},contextName:function(a){return this.useDepths&&a?"depths["+a+"]":"depth"+a},quotedString:function(a){return'"'+a.replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\n/g,"\\n").replace(/\r/g,"\\r").replace(/\u2028/g,"\\u2028").replace(/\u2029/g,"\\u2029")+'"'},objectLiteral:function(a){var b=[];for(var c in a)a.hasOwnProperty(c)&&b.push(this.quotedString(c)+":"+a[c]);return"{"+b.join(",")+"}"},setupHelper:function(a,b,c){var d=[],e=this.setupParams(b,a,d,c),f=this.nameLookup("helpers",b,"helper");return{params:d,paramsInit:e,name:f,callParams:[this.contextName(0)].concat(d).join(", ")}},setupOptions:function(a,b,c){var d,e,f,g={},h=[],i=[],j=[];g.name=this.quotedString(a),g.hash=this.popStack(),this.trackIds&&(g.hashIds=this.popStack()),this.stringParams&&(g.hashTypes=this.popStack(),g.hashContexts=this.popStack()),e=this.popStack(),f=this.popStack(),(f||e)&&(f||(f="this.noop"),e||(e="this.noop"),g.fn=f,g.inverse=e);for(var k=b;k--;)d=this.popStack(),c[k]=d,this.trackIds&&(j[k]=this.popStack()),this.stringParams&&(i[k]=this.popStack(),h[k]=this.popStack());return this.trackIds&&(g.ids="["+j.join(",")+"]"),this.stringParams&&(g.types="["+i.join(",")+"]",g.contexts="["+h.join(",")+"]"),this.options.data&&(g.data="data"),g},setupParams:function(a,b,c,d){var e=this.objectLiteral(this.setupOptions(a,b,c));return d?(this.useRegister("options"),c.push("options"),"options="+e):(c.push(e),"")}};for(var i="break else new var case finally return void catch for switch while continue function this with default if throw delete in try do instanceof typeof abstract enum int short boolean export interface static byte extends long super char final native synchronized class float package throws const goto private transient debugger implements protected volatile double import public let yield".split(" "),j=d.RESERVED_WORDS={},k=0,l=i.length;l>k;k++)j[i[k]]=!0;return d.isValidJavaScriptVariableName=function(a){return!d.RESERVED_WORDS[a]&&/^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(a)},e=d}(d,c),m=function(a,b,c,d,e){"use strict";var f,g=a,h=b,i=c.parser,j=c.parse,k=d.Compiler,l=d.compile,m=d.precompile,n=e,o=g.create,p=function(){var a=o();return a.compile=function(b,c){return l(b,c,a)},a.precompile=function(b,c){return m(b,c,a)},a.AST=h,a.Compiler=k,a.JavaScriptCompiler=n,a.Parser=i,a.parse=j,a};return g=p(),g.create=p,g["default"]=g,f=g}(f,g,j,k,l);return m});
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/vendor/handlebars-v2.0.0.js","/vendor")
-},{"Wb8Gej":8,"buffer":5}],5:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6}],6:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * The buffer module from node.js, for the browser.
@@ -1944,7 +2119,7 @@ function assert (test, message) {
 }
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/browserify/node_modules/buffer/index.js","/../../node_modules/browserify/node_modules/buffer")
-},{"Wb8Gej":8,"base64-js":6,"buffer":5,"ieee754":7}],6:[function(require,module,exports){
+},{"Wb8Gej":9,"base64-js":7,"buffer":6,"ieee754":8}],7:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
@@ -2068,7 +2243,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib/b64.js","/../../node_modules/browserify/node_modules/buffer/node_modules/base64-js/lib")
-},{"Wb8Gej":8,"buffer":5}],7:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6}],8:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
@@ -2156,7 +2331,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/browserify/node_modules/buffer/node_modules/ieee754/index.js","/../../node_modules/browserify/node_modules/buffer/node_modules/ieee754")
-},{"Wb8Gej":8,"buffer":5}],8:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6}],9:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 // shim for using process in browser
 
@@ -2223,7 +2398,7 @@ process.chdir = function (dir) {
 };
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/browserify/node_modules/process/browser.js","/../../node_modules/browserify/node_modules/process")
-},{"Wb8Gej":8,"buffer":5}],9:[function(require,module,exports){
+},{"Wb8Gej":9,"buffer":6}],10:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 /*!
  * jQuery JavaScript Library v2.1.1
@@ -11417,4 +11592,4 @@ return jQuery;
 }));
 
 }).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/../../node_modules/jquery/dist/jquery.js","/../../node_modules/jquery/dist")
-},{"Wb8Gej":8,"buffer":5}]},{},[2])
+},{"Wb8Gej":9,"buffer":6}]},{},[2])
