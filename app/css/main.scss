@@ -126,32 +126,30 @@ body {
     margin-bottom: 10px;
     border: 2px solid rgba(54, 71, 81, 1);
     transition: background-color 0.15s ease-out;
-    .time {
+    .icon {
       width: 72px;
       height: 72px;
-      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
       display: inline-block;
       position: absolute;
-      left: 14px;
-      top: 14px;
+      margin: auto;
+      top: 0;
+      right: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-size: 100%;
+      background-color: transparent;
+      background-repeat: no-repeat;
+      background-position: 0 0;
+    }
+    .time {
+      background-image: url("/img/time-svg.svg");
     }
     .length {
-      width: 72px;
-      height: 72px;
-      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
-      display: inline-block;
-      position: absolute;
-      left: 14px;
-      top: 14px;
+      background-image: url("/img/time-svg.svg");
     }
     .freq {
-      width: 72px;
-      height: 72px;
-      background: transparent url("/img/time-svg.svg") no-repeat 0 0;
-      display: inline-block;
-      position: absolute;
-      left: 14px;
-      top: 14px;
+      background-image: url("/img/time-svg.svg");
     }
   }
 }
@@ -335,12 +333,16 @@ footer a {
   }
   .btn-toggle {
     width: 25%;
-    font-size: 0.8em;
+    font-size: 1.1em;
     margin-right: 10%;
     .grphx {
       width: 100%;
       height: 0;
       padding-bottom: 100%;
+      .icon {
+        width: 60px;
+        height: 60px;
+      }
     }
   }
   .stat {
