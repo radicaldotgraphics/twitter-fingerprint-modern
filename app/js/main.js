@@ -1,11 +1,11 @@
 'use strict';
 
-require('../js/vendor/dat.gui.min.js');
+var Handlebars = require('../js/vendor/handlebars-v2.0.0.js');
 
 var $ = require('jquery'),
   utils = require('./utils'),
   ChartOption = require('./chart-option'),
-  hardCodedTwitterUserForTestingLocally = 'tylermadison',
+  userName = 'tylermadison',
   locStr = window.location.href.toString(),
   user = locStr.substr(locStr.indexOf('@') + 1);
 
@@ -39,7 +39,9 @@ var TextAlign = {
   RIGHT: 'right'
 }
 
-var activeChartIndx = 0;
+var activeChartIndx = 1;
+
+var stats = {};
 
 var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
 
@@ -51,6 +53,8 @@ var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-ma
 
 // When data parses store in hash
 var models = {};
+
+var renderedIndividually = false;
 
 // Convenience cartesian point object
 var Point = function(x, y) {
@@ -99,12 +103,14 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180,
     i = 0,
-    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.45),
+    mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
     minOffset = 40,
     charCountLines = [];
 
   var highestVal = -1,
     highestPoint = null;
+
+  var totalAmount = 0;
 
   // Clear out canvas
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
@@ -118,6 +124,8 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
       dist = mult * amount + minOffset,
       startPoint = new Point(DrawConfig.CENTER_X + minOffset * angleXRad, DrawConfig.CENTER_Y + minOffset * angleYRad),
       endPoint = new Point(DrawConfig.CENTER_X + dist * angleXRad, DrawConfig.CENTER_Y + dist * angleYRad);
+
+    totalAmount += (amount * parseInt(key, 10));
 
     charCountLines.push({
       start: startPoint,
@@ -137,7 +145,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
   setTimeout(function() {
     drawHighPointRect(highestPoint, ctx);
-  }, 1000);
+  }, 1250);
 
   //$('#character-counts').addClass('trigger');
 
@@ -151,7 +159,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   if (renderOutlineMarkers) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 210,
+      var circRadius = 235,
         angleStep = (angleIncrement * i - 90),
         angleXRad = Math.cos(angleStep * rad),
         angleYRad = Math.sin(angleStep * rad),
@@ -181,6 +189,11 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
   }
 
+  /*  renderTmpl('#tweet-average-tmpl', {
+      averageTweetLength: Math.ceil(totalAmount / numPoints)
+    });*/
+  stats.averageTweetLength = Math.ceil(totalAmount / numPoints);
+
 }
 
 function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
@@ -207,9 +220,13 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   var highestVal = -1,
     highestPoint = null;
 
+  var peakTime = -1,
+    lowTime = -1,
+    lowestAmount = Infinity;
+
   for (var key in dataObj) {
     var amount = dataObj[key],
-      angleStep = (angleIncrement * i - 90),
+      angleStep = (angleIncrement * i - 75),
       currX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
       currY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
 
@@ -217,6 +234,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       startX = DrawConfig.CENTER_X + currX;
       startY = DrawConfig.CENTER_Y + currY;
     }
+
+    //console.log('Time:', key, ' Amount:', amount);
 
     // Next point to draw to
     var nextX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
@@ -241,7 +260,13 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       }
     }
 
+    if (amount < lowestAmount) {
+      lowTime = key;
+      lowestAmount = amount;
+    }
+
     if (amount > highestVal) {
+      peakTime = key;
       highestVal = amount;
       highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
     }
@@ -257,7 +282,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   if (renderOutlines) {
     for (var i = 0; i < numPoints; i++) {
       ctx.beginPath();
-      var circRadius = 190,
+      var circRadius = 200,
         angleStep = (angleIncrement * i - 75),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
         yy = DrawConfig.CENTER_Y + circRadius * Math.sin(angleStep * rad),
@@ -284,6 +309,14 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 
   drawTrianlgeMarker(highestPoint, ctx);
 
+  /*  renderTmpl('#time-of-day-tmpl', {
+      mostActiveTime: peakTime + ':00 ' + (peakTime > 12 ? 'PM' : 'AM'),
+      leastActiveTime: lowTime + ':00 ' + (peakTime > 12 ? 'PM' : 'AM')
+    });*/
+
+  stats.mostActiveTime = peakTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
+  stats.leastActiveTime = lowTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
+
   //console.log('highestVal:', highestVal, highestPoint);
 
 }
@@ -306,7 +339,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     minOffset = 45; // Inner circle
 
   var highestVal = -1,
-    highestPoint = null;
+    highestPoint = null,
+    mostUsedChar = '';
 
   var mostUsedCtx = document.getElementById('most-used-markers').getContext('2d');
   mostUsedCtx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
@@ -351,6 +385,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     }
 
     if (amount > highestVal) {
+      mostUsedChar = chars[i].toUpperCase();
       highestVal = amount;
       highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
     }
@@ -401,6 +436,11 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.stroke();
 
+  /*  renderTmpl('#most-used-tmpl', {
+      mostUsedCharacter: mostUsedChar + ' (' + highestVal + ' times)'
+    })*/
+
+  stats.mostUsedCharacter = mostUsedChar + ' (' + highestVal + ' times)'
 }
 
 function drawTickIndicator(line, lineWidth, ctx) {
@@ -563,57 +603,51 @@ function parseData(data) {
   models['mostUsedChar'] = mostUsedChar;
 
   // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
+  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
+  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
+  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
 
-  //$('#time-of-day, #most-used, #most-used-markers').hide();
-
-  renderTmpl({
-    numTweets: data.tweets.length,
-    mostActiveTime: '11:00 PM',
-    leastActiveTime: '4:00 AM',
-    averageTweetLength: 120,
-    mostUsedCharacter: 'E (' + 240 + ') times'
-  });
+  setTimeout(function() {
+    $(canvasIds[0]).addClass('active');
+    $(canvasIds[1]).addClass('active');
+    $(canvasIds[2]).addClass('active');
+  }, 250);
 
   drawCenterX();
 
-  showChart();
+  stats.tweetCount = data.tweets.length;
+
+  var $tmplEl = $('#stats-tmpl'),
+    source = $tmplEl.html(),
+    html = Handlebars.compile(source)(stats);
+
+  $('#stats').html(html);
+
+  //console.log(html);
+
 }
 
 function showChart() {
 
-  $('canvas, .stat, .btn-toggle').removeClass('active');
+  $('canvas, .stat').removeClass('active');
 
-  $(canvasIds[activeChartIndx]).addClass('active');
-  $(canvasIds[activeChartIndx]).addClass('active');
-  $('.btn-toggle').eq(activeChartIndx).addClass('active');
-  $('.stat').eq(activeChartIndx).addClass('active');
-  $('#top-layer').addClass('active');
-}
+  $('.intro').hide();
 
-/**
- * Simple template data bindings only works with nums and strings
- * @param  {Object} obj data object to use props off
- * @return {[type]}     [description]
- */
-function renderTmpl(obj) {
-  $('[t-binding]').each(function(indx, el) {
-    var $boundEl = $(this),
-      token = $boundEl.html(),
-      prop = undefined,
-      start = token.indexOf('{') + 1,
-      end = token.lastIndexOf('}');
+  setTimeout(function() {
 
-    prop = token.substr(start, end - start);
-
-    if (obj[prop] !== undefined) {
-      $boundEl.html(token.replace(/\{(.+)\}/g, obj[prop]))
-        .removeAttr('t-binding');
+    if (!renderedIndividually) {
+      renderedIndividually = true;
+      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
+      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
+      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
     }
+    $(canvasIds[activeChartIndx]).addClass('active');
+    $(canvasIds[activeChartIndx]).addClass('active');
+    $('.btn-toggle').eq(activeChartIndx).addClass('active');
+    $('.stat').eq(activeChartIndx).addClass('active');
+    $('#top-layer').addClass('active');
+  }, 750);
 
-  });
 }
 
 function drawCenterX() {
@@ -624,66 +658,53 @@ function drawCenterX() {
   ctx.fillText('X', DrawConfig.CENTER_X, DrawConfig.CENTER_Y + 2);
 }
 
-function addUserNameTextToBackgroundLayer() {
-  var ctx = document.getElementById('background').getContext('2d');
-  ctx.font = '14pt HelveticaNeue-Light';
-  ctx.fillStyle = '#76787A';
-  ctx.textAlign = TextAlign.LEFT;
-  ctx.fillText('@' + hardCodedTwitterUserForTestingLocally, 15, 30);
-}
-
 function getData() {
-  $('.chart-inner, .info').css('visibility', 'hidden');
-  var promise = $.getJSON('/api/timeline?screen_name=' + hardCodedTwitterUserForTestingLocally);
+  reset();
+
+  var promise = $.getJSON('/api/timeline?screen_name=' + userName);
   promise.then(function(data) {
     $('.chart-inner, .info').css('visibility', 'visible');
     parseData(data);
   });
 }
 
-/*function chartCallback(id, renderOuter) {
+function reset() {
+  renderedIndividually = false;
+  activeChartIndx = -1;
+  stats = {};
+  $('.btn-toggle').removeClass('active');
 
-  console.log(id, renderOuter);
-
-  switch (id) {
-    case '#character-counts':
-      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, renderOuter);
-      break;
-    case '#time-of-day':
-      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, renderOuter);
-      break;
-    case '#most-used, #most-used-markers':
-      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, renderOuter);
-      break;
-  }
-
-}*/
+  $('.chart-inner, .info').css('visibility', 'hidden');
+}
 
 function init() {
   var self = this;
+
+  reset();
 
   $('canvas').each(function(i, canvasEl) {
     canvasEl.getContext('2d').scale(2, 2);
   });
 
-  // Init the radio options
-  /*  $('[chart-option]').each(function() {
-      var chartOption = new ChartOption($(this), chartCallback);
-    });*/
-
   var $userInput = $('.user-name');
 
   if (user.length && locStr.indexOf('@') > 0) {
-    hardCodedTwitterUserForTestingLocally = user;
+    userName = user;
     console.log(user);
-    $userInput.val(hardCodedTwitterUserForTestingLocally);
+    $userInput.val(userName);
     getData();
   }
 
-  $('.user-submit').on('click', getData.bind(this));
+  $('.user-submit').on('click', function() {
+    userName = $userInput.val();
+    console.log(userName);
+    getData();
+  });
 
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
+    $('.btn-toggle').removeClass('active');
+    $(this).addClass('active');
     activeChartIndx = $(this).index();
     showChart();
   });
@@ -692,7 +713,8 @@ function init() {
 
     $('.chart-inner').css('visibility', 'visible');
     if (e.keyCode === 13 && $userInput.is(':focus')) {
-      hardCodedTwitterUserForTestingLocally = $userInput.val();
+      userName = $userInput.val();
+
       getData();
     }
   });

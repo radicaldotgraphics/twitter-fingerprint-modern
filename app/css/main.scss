@@ -38,21 +38,26 @@ body {
   text-transform: uppercase;
   font-size: 1.0em;
   margin-top: 20px;
+  margin-bottom: 10px;
 }
 
 .stat-wrap {
   width: 100%;
   min-height: 30px;
+  .intro {
+    text-align: center;
+    font-size: 1.1em;
+    color: rgba(91, 108, 117, 1);
+  }
 }
 
 .stat {
   text-align: center;
   font-size: 1.3em;
-  margin-top: 15px;
   color: #EC0972;
   opacity: 0;
   display: none;
-  transition: opacity 0.25s ease-out;
+  //transition: opacity 1s ease-out;
   &.active {
     opacity: 1;
     display: block;
@@ -60,7 +65,7 @@ body {
   span {
     color: white;
     &.divider {
-      color: #00ff00;
+      color: rgba(24, 93, 123, 1);
     }
   }
 }
@@ -120,13 +125,16 @@ body {
   position: relative;
   height: 538px;
   visibility: hidden;
+  margin-top: 15px;
   &.active {
     visibility: visible;
   }
 }
 
 // Data binding stuff
-[t-binding] {
+[t-binding] {}
+
+[t-hide] {
   visibility: hidden !important;
 }
 
@@ -209,11 +217,8 @@ footer a {
 
 #most-used-markers {
   z-index: 100;
-  display: none;
+  display: inline-block;
   background-color: transparent;
-  &.merged {
-    display: inline-block;
-  }
 }
 
 #time-of-day {
