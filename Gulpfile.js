@@ -27,6 +27,12 @@ gulp.task('html', function() {
     .pipe(gulp.dest('dist/'));
 });
 
+// Fonts Task
+gulp.task('copy-fonts', function() {
+  gulp.src('app/fonts/*')
+    .pipe(gulp.dest('dist/fonts/'));
+});
+
 // JSHint task
 gulp.task('lint', function() {
   gulp.src(['app/js/*.js', '!app/js/vendor/*.js', '!app/js/main_old.js'])
@@ -78,7 +84,7 @@ gulp.task('vendor-js', function() {
 });
 
 // Dev task
-gulp.task('dev', ['html', 'vendor-js', 'css', 'lint', 'img', 'browserify'], function() {});
+gulp.task('dev', ['html', 'vendor-js', 'css', 'lint', 'img', 'copy-fonts', 'browserify'], function() {});
 
 gulp.task('watch', ['lint'], function() {
   // Start webserver
@@ -105,3 +111,4 @@ gulp.task('watch', ['lint'], function() {
 });
 
 gulp.task('default', ['clean', 'dev', 'watch']);
+
