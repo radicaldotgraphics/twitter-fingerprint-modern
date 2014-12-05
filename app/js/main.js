@@ -40,9 +40,7 @@ var TextAlign = {
 }
 
 var activeChartIndx = 1;
-
 var stats = {};
-
 var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
 
 // TODO: add canvas element names as constants
@@ -186,12 +184,9 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
         end: endPoint
       }, 1, ctx);
     }
-
   }
 
-  /*  renderTmpl('#tweet-average-tmpl', {
-      averageTweetLength: Math.ceil(totalAmount / numPoints)
-    });*/
+  // Add average tweet length to stats object for templating
   stats.averageTweetLength = Math.ceil(totalAmount / numPoints);
 
 }
@@ -199,7 +194,8 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   var numPoints = Object.keys(dataObj).length,
     angleIncrement = (360 / numPoints),
-    rad = Math.PI / 180;
+    rad = Math.PI / 180,
+    angleOffset = 90 - (360 / numPoints);
 
   var i = 0,
     startX = -1,
@@ -209,13 +205,10 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     mult = utils.getDistMult(dataObj, DrawConfig.RADIUS - 225),
     minOffset = 41; // Inner circle
 
-  // console.log('Using Multiplyer :: ', mult);
+  var points = [];
 
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
-
-  ctx.beginPath();
-
-  //console.log('Rendering time of day: ', dataObj);
+  //ctx.beginPath();
 
   var highestVal = -1,
     highestPoint = null;
@@ -226,39 +219,9 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 
   for (var key in dataObj) {
     var amount = dataObj[key],
-      angleStep = (angleIncrement * i - 75),
+      angleStep = (angleIncrement * i - angleOffset),
       currX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
       currY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
-
-    if (startX === -1 && startY === -1) {
-      startX = DrawConfig.CENTER_X + currX;
-      startY = DrawConfig.CENTER_Y + currY;
-    }
-
-    //console.log('Time:', key, ' Amount:', amount);
-
-    // Next point to draw to
-    var nextX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
-      nextY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
-
-    if (i === numPoints) {
-      ctx.lineTo(startX, startY); // Gets back to home to fill
-    } else {
-      if (i === 0) {
-
-        lastX = DrawConfig.CENTER_X + nextX;
-        lastY = DrawConfig.CENTER_Y + nextY;
-
-        ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
-        ctx.lineTo(lastX, lastY);
-
-      } else {
-        lastX = DrawConfig.CENTER_X + nextX;
-        lastY = DrawConfig.CENTER_Y + nextY;
-
-        ctx.lineTo(lastX, lastY);
-      }
-    }
 
     if (amount < lowestAmount) {
       lowTime = key;
@@ -270,13 +233,52 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       highestVal = amount;
       highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
     }
-
     i++;
   }
+  var scale = 0.001;
 
-  ctx.closePath();
-  ctx.fillStyle = Colors.TIME_OF_DAY_FILL;
-  ctx.fill();
+  function animate() {
+    var i = 0;
+    var points = [];
+    for (var key in dataObj) {
+      var amount = dataObj[key],
+        angleStep = (angleIncrement * i - angleOffset),
+        currX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
+        currY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+
+      if (startX === -1 && startY === -1) {
+        startX = DrawConfig.CENTER_X + currX;
+        startY = DrawConfig.CENTER_Y + currY;
+      }
+
+      // Next point to draw to
+      var nextX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
+        nextY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+
+      if (i === 0) {
+        // Push start end to new point obect
+        points.push(new Point(currX, currY));
+      } else {
+        // Push start end to new point obect
+        points.push(new Point(nextX, nextY));
+      }
+
+      i++;
+    }
+
+    drawPoly(points, ctx, Colors.TIME_OF_DAY_FILL);
+
+    if (scale < 1) {
+      scale *= 1.1;
+      if (scale > 1) {
+        scale = 1;
+      }
+      requestAnimationFrame(animate);
+    } else {
+      drawTrianlgeMarker(highestPoint, ctx);
+    }
+
+  }
 
   // Draw tick marks around circumference
   if (renderOutlines) {
@@ -307,18 +309,51 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     }
   }
 
-  drawTrianlgeMarker(highestPoint, ctx);
-
-  /*  renderTmpl('#time-of-day-tmpl', {
-      mostActiveTime: peakTime + ':00 ' + (peakTime > 12 ? 'PM' : 'AM'),
-      leastActiveTime: lowTime + ':00 ' + (peakTime > 12 ? 'PM' : 'AM')
-    });*/
-
   stats.mostActiveTime = peakTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
   stats.leastActiveTime = lowTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
 
-  //console.log('highestVal:', highestVal, highestPoint);
+  requestAnimationFrame(animate);
 
+}
+
+function animateLine(line, lineWidth, color, ctx) {
+  var speed = 0.00012;
+
+  function animate() {
+    ctx.strokeStyle = color || Colors.GREEN;
+    ctx.lineWidth = lineWidth || 1;
+    ctx.beginPath();
+    ctx.moveTo(line.start.x, line.start.y);
+    ctx.lineTo(line.start.x + speed * (line.end.x - line.start.x), line.start.y + speed * (line.end.y - line.start.y));
+    ctx.stroke();
+    ctx.closePath();
+
+    if (speed < 1) {
+      speed *= 1.2;
+      if (speed > 1) {
+        speed = 1;
+      }
+      requestAnimationFrame(animate);
+    }
+
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function drawPoly(points, ctx, fillColor) {
+  ctx.beginPath();
+  ctx.moveTo(DrawConfig.CENTER_X + points[0].x, DrawConfig.CENTER_Y + points[0].y);
+
+  for (var i = 1; i < points.length; i++) {
+    ctx.lineTo(DrawConfig.CENTER_X + points[i].x, DrawConfig.CENTER_Y + points[i].y);
+  }
+
+  ctx.lineTo(DrawConfig.CENTER_X + points[0].x, DrawConfig.CENTER_Y + points[0].y);
+
+  ctx.closePath();
+  ctx.fillStyle = fillColor || '#00ff00';
+  ctx.fill();
 }
 
 function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
@@ -347,7 +382,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
-  ctx.beginPath();
+  //ctx.beginPath();
 
   for (var i = 0; i < chars.length; i++) {
 
@@ -358,30 +393,21 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
     //console.log('plotting: ', chars[i], dataObj[chars[i]] || 0);
 
-    if (startX === -1 && startY === -1) {
-      startX = DrawConfig.CENTER_X + currX;
-      startY = DrawConfig.CENTER_Y + currY;
-    }
-
     // Next point to draw to
     var nextX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
       nextY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
 
-    if (i === numPoints) {
-      ctx.lineTo(startX, startY); // Gets back to home to fill
+    if (i === 0) {
+      lastX = DrawConfig.CENTER_X + nextX;
+      lastY = DrawConfig.CENTER_Y + nextY;
+      //ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
+      //ctx.lineTo(lastX, lastY);
+      markers.push(new Point(lastX, lastY));
     } else {
-      if (i === 0) {
-        lastX = DrawConfig.CENTER_X + nextX;
-        lastY = DrawConfig.CENTER_Y + nextY;
-        ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
-        ctx.lineTo(lastX, lastY);
-        markers.push(new Point(lastX, lastY));
-      } else {
-        lastX = DrawConfig.CENTER_X + nextX;
-        lastY = DrawConfig.CENTER_Y + nextY;
-        ctx.lineTo(lastX, lastY);
-        markers.push(new Point(lastX, lastY));
-      }
+      lastX = DrawConfig.CENTER_X + nextX;
+      lastY = DrawConfig.CENTER_Y + nextY;
+      //ctx.lineTo(lastX, lastY);
+      markers.push(new Point(lastX, lastY));
     }
 
     if (amount > highestVal) {
@@ -391,17 +417,49 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     }
   }
 
-  ctx.closePath();
+  var scale = 0.001;
 
-  ctx.fillStyle = Colors.MOST_USED_FILL;
-  ctx.fill();
+  function animate() {
+    var i = 0;
+    var points = [];
+    for (var i = 0; i < chars.length; i++) {
+      var amount = dataObj[chars[i]] || 0,
+        angleStep = (angleIncrement * i - 90),
+        currX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
+        currY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+
+      // Next point to draw to
+      var nextX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
+        nextY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+
+      if (i === 0) {
+        // Push start end to new point obect
+        points.push(new Point(currX, currY));
+      } else {
+        // Push start end to new point obect
+        points.push(new Point(nextX, nextY));
+      }
+
+    }
+
+    drawPoly(points, ctx, Colors.MOST_USED_FILL);
+
+    if (scale < 1) {
+      scale *= 1.1;
+      if (scale > 1) {
+        scale = 1;
+      }
+      requestAnimationFrame(animate);
+    } else {
+
+      drawMarkers(markers, mostUsedCtx);
+      drawHighPointCirc(highestPoint, ctx);
+    }
+
+  }
 
   ctx.fillStyle = Colors.GRAY;
   ctx.beginPath();
-
-  setTimeout(function() {
-    drawHighPointCirc(highestPoint, ctx);
-  }, 1000);
 
   if (renderOutlines) {
     for (var i = 0; i < chars.length; i++) {
@@ -432,15 +490,9 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     }
   }
 
-  drawMarkers(markers, mostUsedCtx);
+  stats.mostUsedCharacter = mostUsedChar + ' (' + highestVal + ' times)';
 
-  ctx.stroke();
-
-  /*  renderTmpl('#most-used-tmpl', {
-      mostUsedCharacter: mostUsedChar + ' (' + highestVal + ' times)'
-    })*/
-
-  stats.mostUsedCharacter = mostUsedChar + ' (' + highestVal + ' times)'
+  requestAnimationFrame(animate);
 }
 
 function drawTickIndicator(line, lineWidth, ctx) {
@@ -455,31 +507,6 @@ function drawTickIndicator(line, lineWidth, ctx) {
   ctx.lineTo(line.end.x, line.end.y);
   ctx.stroke();
   ctx.closePath();
-}
-
-function animateLine(line, lineWidth, color, ctx) {
-  var speed = 0.00009;
-
-  function animate() {
-    ctx.strokeStyle = color || Colors.GREEN;
-    ctx.lineWidth = lineWidth || 1;
-    ctx.beginPath();
-    ctx.moveTo(line.start.x, line.start.y);
-    ctx.lineTo(line.start.x + speed * (line.end.x - line.start.x), line.start.y + speed * (line.end.y - line.start.y));
-    ctx.stroke();
-    ctx.closePath();
-
-    if (speed < 1) {
-      speed *= 1.2;
-      if (speed > 1) {
-        speed = 1;
-      }
-      requestAnimationFrame(animate);
-    }
-
-  }
-
-  requestAnimationFrame(animate);
 }
 
 function drawLines(lines, lineWidth, color, ctx) {
@@ -635,18 +662,17 @@ function showChart() {
 
   setTimeout(function() {
 
-    if (!renderedIndividually) {
-      renderedIndividually = true;
-      renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
-      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
-      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
-    }
+    renderedIndividually = true;
+    renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
+    renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
+    renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
+
     $(canvasIds[activeChartIndx]).addClass('active');
     $(canvasIds[activeChartIndx]).addClass('active');
     $('.btn-toggle').eq(activeChartIndx).addClass('active');
     $('.stat').eq(activeChartIndx).addClass('active');
     $('#top-layer').addClass('active');
-  }, 750);
+  }, 350);
 
 }
 
