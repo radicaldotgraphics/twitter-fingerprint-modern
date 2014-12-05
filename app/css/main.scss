@@ -344,6 +344,20 @@ footer a {
         height: 60px;
       }
     }
+    &:hover,
+    &.active {
+      .grphx {
+        .time {
+          background-position: 0 -60px;
+        }
+        .length {
+          background-position: 0 -60px;
+        }
+        .freq {
+          background-position: 0 -60px;
+        }
+      }
+    }
   }
   .stat {
     font-size: 0.7em;
