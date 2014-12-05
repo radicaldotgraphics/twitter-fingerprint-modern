@@ -220,8 +220,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   for (var key in dataObj) {
     var amount = dataObj[key],
       angleStep = (angleIncrement * i - angleOffset),
-      currX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
-      currY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
+      pt = new Point(DrawConfig.CENTER_X + ((mult * amount + minOffset) * Math.cos(angleStep * rad)), DrawConfig.CENTER_Y + ((mult * amount + minOffset) * Math.sin(angleStep * rad)));
 
     if (amount < lowestAmount) {
       lowTime = key;
@@ -231,38 +230,22 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     if (amount > highestVal) {
       peakTime = key;
       highestVal = amount;
-      highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
+      highestPoint = pt;
     }
     i++;
   }
-  var scale = 0.001;
 
+  // Animation loop function
+  var scale = 0.001;
   function animate() {
     var i = 0;
     var points = [];
     for (var key in dataObj) {
       var amount = dataObj[key],
         angleStep = (angleIncrement * i - angleOffset),
-        currX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
-        currY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
 
-      if (startX === -1 && startY === -1) {
-        startX = DrawConfig.CENTER_X + currX;
-        startY = DrawConfig.CENTER_Y + currY;
-      }
-
-      // Next point to draw to
-      var nextX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
-        nextY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
-
-      if (i === 0) {
-        // Push start end to new point obect
-        points.push(new Point(currX, currY));
-      } else {
-        // Push start end to new point obect
-        points.push(new Point(nextX, nextY));
-      }
-
+      points.push(pt);
       i++;
     }
 
@@ -382,64 +365,30 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
 
-  //ctx.beginPath();
-
   for (var i = 0; i < chars.length; i++) {
 
     var amount = dataObj[chars[i]] || 0,
       angleStep = (angleIncrement * i - 90),
-      currX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
-      currY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
+      pt = new Point(DrawConfig.CENTER_X + (mult * amount + minOffset) * Math.cos(angleStep * rad), DrawConfig.CENTER_Y + (mult * amount + minOffset) * Math.sin(angleStep * rad));
 
-    //console.log('plotting: ', chars[i], dataObj[chars[i]] || 0);
-
-    // Next point to draw to
-    var nextX = ((mult * amount + minOffset) * Math.cos(angleStep * rad)),
-      nextY = ((mult * amount + minOffset) * Math.sin(angleStep * rad));
-
-    if (i === 0) {
-      lastX = DrawConfig.CENTER_X + nextX;
-      lastY = DrawConfig.CENTER_Y + nextY;
-      //ctx.moveTo(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
-      //ctx.lineTo(lastX, lastY);
-      markers.push(new Point(lastX, lastY));
-    } else {
-      lastX = DrawConfig.CENTER_X + nextX;
-      lastY = DrawConfig.CENTER_Y + nextY;
-      //ctx.lineTo(lastX, lastY);
-      markers.push(new Point(lastX, lastY));
-    }
+    markers.push(pt);
 
     if (amount > highestVal) {
       mostUsedChar = chars[i].toUpperCase();
       highestVal = amount;
-      highestPoint = new Point(DrawConfig.CENTER_X + currX, DrawConfig.CENTER_Y + currY);
+      highestPoint = pt;
     }
   }
 
+  // Animation loop function
   var scale = 0.001;
-
   function animate() {
-    var i = 0;
     var points = [];
     for (var i = 0; i < chars.length; i++) {
       var amount = dataObj[chars[i]] || 0,
         angleStep = (angleIncrement * i - 90),
-        currX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
-        currY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
-
-      // Next point to draw to
-      var nextX = (((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad)),
-        nextY = (((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
-
-      if (i === 0) {
-        // Push start end to new point obect
-        points.push(new Point(currX, currY));
-      } else {
-        // Push start end to new point obect
-        points.push(new Point(nextX, nextY));
-      }
-
+        pt = new Point(((mult * scale) * amount + minOffset) * Math.cos(angleStep * rad), ((mult * scale) * amount + minOffset) * Math.sin(angleStep * rad));
+      points.push(pt);
     }
 
     drawPoly(points, ctx, Colors.MOST_USED_FILL);
@@ -451,17 +400,14 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       }
       requestAnimationFrame(animate);
     } else {
-
       drawMarkers(markers, mostUsedCtx);
       drawHighPointCirc(highestPoint, ctx);
     }
-
   }
 
-  ctx.fillStyle = Colors.GRAY;
-  ctx.beginPath();
-
   if (renderOutlines) {
+    ctx.fillStyle = Colors.GRAY;
+    ctx.beginPath();
     for (var i = 0; i < chars.length; i++) {
       var circRadius = 235,
         angleStep = (angleIncrement * i - 90),
@@ -491,7 +437,6 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
   }
 
   stats.mostUsedCharacter = mostUsedChar + ' (' + highestVal + ' times)';
-
   requestAnimationFrame(animate);
 }
 
