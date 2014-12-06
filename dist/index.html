@@ -5,11 +5,81 @@
   <title>Twitter Compass</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <meta name="apple-mobile-web-app-capable" content="yes">
-
+  <!--   <link rel="apple-touch-icon" href="/images/icon-60@2x.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-60@3x.png" />
+    <link rel="apple-touch-icon" sizes="76x76" href="/images/icon-76.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/images/icon-76@2x.png" />
+    <link rel="apple-touch-icon" sizes="58x58" href="/images/icon-Small@2x.png" /> -->
+  <link rel="stylesheet" href="/css/main.css" />
 </head>
 
 <body>
-
+  <div class="chart-wrap">
+    <div class="chart">
+      <h1>Hello.</h1>
+      <div class="input-wrap">
+        <input class="user-name" type="text" placeholder="@username" />
+        <div class="user-submit">RUN</div>
+      </div>
+      <div class="chart-inner">
+        <canvas id="background" width="1200" height="1076"></canvas>
+        <canvas id="character-counts" width="1200" height="1076"></canvas>
+        <canvas id="time-of-day" width="1200" height="1076"></canvas>
+        <canvas id="most-used" width="1200" height="1076"></canvas>
+        <canvas id="most-used-markers" width="1200" height="1076"></canvas>
+        <canvas id="top-layer" width="1200" height="1076"></canvas>
+      </div>
+      <div class="info">
+        <div id="stats"></div>
+        <div class="btn-wrap">
+          <div class="btn-toggle time">
+            <div class="grphx">
+              <span class="icon time"></span>
+            </div>
+            <span>time
+              <br> of day</span>
+          </div>
+          <div class="btn-toggle length">
+            <div class="grphx">
+              <span class="icon length"></span>
+            </div>
+            <span>tweet length</span>
+          </div>
+          <div class="btn-toggle freq">
+            <div class="grphx">
+              <span class="icon freq"></span>
+            </div>
+            <span>character frequency</span>
+          </div>
+        </div>
+        <h2>About.</h2>
+        <p class="about">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p>
+        <footer>
+          <a href="http://www.t2dsf.com" target="_blank">
+            <img src="/img/t2d-logo.png" alt="">
+          </a>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <script id="stats-tmpl" type="text/x-handlebars-template">
+    <p class="tweet-count">Last {{tweetCount}} Tweets</p>
+    <div class="stat-wrap">
+      <p class="intro">Toggle data sets by the following parameters.</p>
+      <p class="stat time-of-day">Most active at
+        <span class="most-active">{{mostActiveTime}}</span>
+        <span class="divider">-</span>Least active at
+        <span class="least-active">{{leastActiveTime}}</span>
+      </p>
+      <p class="stat tweet-length">Average Tweet length
+        <span>{{averageTweetLength}} characters</span>
+      </p>
+      <p class="stat most-used">Most used character
+        <span>{{mostUsedCharacter}}</span>
+      </p>
+    </div>
+  </script>
+  <script src="/js/bundle.js"></script>
 </body>
 
 </html>
