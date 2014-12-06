@@ -10,10 +10,8 @@ var $ = require('jquery'),
   locStr = window.location.href.toString(),
   user = locStr.substr(locStr.indexOf('@') + 1);
 
-//////////////////////////////////////////////////////////
-// CONSTANTS
 
-// Common draw variables
+// Draw config used as refernce points
 var DrawConfig = {
   CANVAS_WIDTH: 600,
   CANVAS_HEIGHT: 600,
@@ -43,12 +41,6 @@ var TextAlign = {
 var activeChartIndx = 1;
 var stats = {};
 var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
-
-// TODO: add canvas element names as constants
-// var CanvasClassIds = {}
-
-// END CONSTANTS
-///////////////////////////////////////////////////////////
 
 // When data parses store in hash
 var models = {};
