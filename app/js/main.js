@@ -10,7 +10,6 @@ var $ = require('jquery'),
   locStr = window.location.href.toString(),
   user = locStr.substr(locStr.indexOf('@') + 1);
 
-
 // Draw config used as refernce points
 var DrawConfig = {
   CANVAS_WIDTH: 600,
@@ -38,14 +37,12 @@ var TextAlign = {
   RIGHT: 'right'
 }
 
-var activeChartIndx = 1;
-var stats = {};
-var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
-
-// When data parses store in hash
-var models = {};
-var charCountHighPoint = null;
-var renderedIndividually = false;
+var activeChartIndx = 1,
+  stats = {},
+  canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'],
+  models = {},
+  charCountHighPoint = null,
+  renderedIndividually = false;
 
 // Convenience cartesian point object
 var Point = function(x, y) {
@@ -133,7 +130,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
-
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -310,7 +306,7 @@ function animateLine(line, lineWidth, color, ctx) {
     if (iteration < totalIterations) {
       iteration++;
       requestAnimationFrame(animate);
-    }else if(line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y){
+    } else if (line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y) {
       drawHighPointRect(line.end, ctx);
     }
 
@@ -479,14 +475,27 @@ function drawLines(lines, lineWidth, color, ctx) {
 
 function drawMarkers(points, ctx) {
 
-  for (var i = 0; i < points.length; i++) {
-    var point = points[i];
-    ctx.beginPath();
-    ctx.strokeStyle = Colors.BRIGHT_BLUE;
-    ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.stroke();
+  var delay = 0,
+    i = 0;
+
+  var delayedCb = function() {
+    setTimeout(function() {
+      var point = points[i];
+      ctx.beginPath();
+      ctx.strokeStyle = Colors.BRIGHT_BLUE;
+      ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.stroke();
+      if (i < points.length - 1) {
+        delay = 10;
+        delayedCb();
+        i++;
+      }
+    }, delay);
   }
+
+  delayedCb();
+
 }
 
 function drawTrianlgeMarker(point, ctx) {

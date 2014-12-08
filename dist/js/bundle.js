@@ -66,7 +66,6 @@ var $ = require('jquery'),
   locStr = window.location.href.toString(),
   user = locStr.substr(locStr.indexOf('@') + 1);
 
-
 // Draw config used as refernce points
 var DrawConfig = {
   CANVAS_WIDTH: 600,
@@ -94,14 +93,12 @@ var TextAlign = {
   RIGHT: 'right'
 }
 
-var activeChartIndx = 1;
-var stats = {};
-var canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'];
-
-// When data parses store in hash
-var models = {};
-var charCountHighPoint = null;
-var renderedIndividually = false;
+var activeChartIndx = 1,
+  stats = {},
+  canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'],
+  models = {},
+  charCountHighPoint = null,
+  renderedIndividually = false;
 
 // Convenience cartesian point object
 var Point = function(x, y) {
@@ -189,7 +186,6 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
 
   // Draw lines extruding from center
   drawLines(charCountLines, 1, Colors.PINK, ctx);
-
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -366,7 +362,7 @@ function animateLine(line, lineWidth, color, ctx) {
     if (iteration < totalIterations) {
       iteration++;
       requestAnimationFrame(animate);
-    }else if(line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y){
+    } else if (line.end.x === charCountHighPoint.x && line.end.y === charCountHighPoint.y) {
       drawHighPointRect(line.end, ctx);
     }
 
@@ -535,14 +531,27 @@ function drawLines(lines, lineWidth, color, ctx) {
 
 function drawMarkers(points, ctx) {
 
-  for (var i = 0; i < points.length; i++) {
-    var point = points[i];
-    ctx.beginPath();
-    ctx.strokeStyle = Colors.BRIGHT_BLUE;
-    ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.stroke();
+  var delay = 0,
+    i = 0;
+
+  var delayedCb = function() {
+    setTimeout(function() {
+      var point = points[i];
+      ctx.beginPath();
+      ctx.strokeStyle = Colors.BRIGHT_BLUE;
+      ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
+      ctx.closePath();
+      ctx.stroke();
+      if (i < points.length - 1) {
+        delay = 10;
+        delayedCb();
+        i++;
+      }
+    }, delay);
   }
+
+  delayedCb();
+
 }
 
 function drawTrianlgeMarker(point, ctx) {
@@ -761,7 +770,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_9c9eef45.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_a6c2b3ff.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
