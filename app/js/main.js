@@ -280,8 +280,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
     }
   }
 
-  stats.mostActiveTime = peakTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
-  stats.leastActiveTime = lowTime + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
+  stats.mostActiveTime = (peakTime % 12) + ':00 ' + (peakTime >= 12 ? 'PM' : 'AM');
+  stats.leastActiveTime = (lowTime % 12) + ':00 ' + (lowTime >= 12 ? 'PM' : 'AM');
 
   requestAnimationFrame(animate);
 
