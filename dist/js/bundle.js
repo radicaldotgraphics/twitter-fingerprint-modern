@@ -650,16 +650,7 @@ function parseData(data) {
   models['timeOfDay'] = timeOfDay
   models['mostUsedChar'] = mostUsedChar;
 
-  // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
-
-  setTimeout(function() {
-    $(canvasIds[0]).addClass('active');
-    $(canvasIds[1]).addClass('active');
-    $(canvasIds[2]).addClass('active');
-  }, 250);
+  renderAllChartsTogether()
 
   drawCenterX();
 
@@ -726,6 +717,19 @@ function reset() {
   $('.chart-inner, .info').css('visibility', 'hidden');
 }
 
+function renderAllChartsTogether() {
+  // Render time of day chart to the timeof day canvas element
+  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
+  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
+  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
+
+  setTimeout(function() {
+    $(canvasIds[0]).addClass('active');
+    $(canvasIds[1]).addClass('active');
+    $(canvasIds[2]).addClass('active');
+  }, 250);
+}
+
 function init() {
   var self = this;
 
@@ -752,10 +756,21 @@ function init() {
 
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
-    $('.btn-toggle').removeClass('active');
-    $(this).addClass('active');
-    activeChartIndx = $(this).index();
-    showChart();
+
+    if ($(this).hasClass('active')) {
+      $(this).removeClass('active');
+      renderedIndividually = false;
+      activeChartIndx = -1;
+
+      renderAllChartsTogether();
+
+    } else {
+      $('.btn-toggle').removeClass('active');
+      $(this).addClass('active');
+      activeChartIndx = $(this).index();
+      showChart();
+    }
+
   });
 
   $(document).on('keyup', function(e) {
@@ -772,7 +787,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_255f235e.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_67309020.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

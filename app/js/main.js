@@ -594,16 +594,7 @@ function parseData(data) {
   models['timeOfDay'] = timeOfDay
   models['mostUsedChar'] = mostUsedChar;
 
-  // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
-
-  setTimeout(function() {
-    $(canvasIds[0]).addClass('active');
-    $(canvasIds[1]).addClass('active');
-    $(canvasIds[2]).addClass('active');
-  }, 250);
+  renderAllChartsTogether()
 
   drawCenterX();
 
@@ -670,6 +661,19 @@ function reset() {
   $('.chart-inner, .info').css('visibility', 'hidden');
 }
 
+function renderAllChartsTogether() {
+  // Render time of day chart to the timeof day canvas element
+  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
+  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
+  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
+
+  setTimeout(function() {
+    $(canvasIds[0]).addClass('active');
+    $(canvasIds[1]).addClass('active');
+    $(canvasIds[2]).addClass('active');
+  }, 250);
+}
+
 function init() {
   var self = this;
 
@@ -696,10 +700,21 @@ function init() {
 
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
-    $('.btn-toggle').removeClass('active');
-    $(this).addClass('active');
-    activeChartIndx = $(this).index();
-    showChart();
+
+    if ($(this).hasClass('active')) {
+      $(this).removeClass('active');
+      renderedIndividually = false;
+      activeChartIndx = -1;
+
+      renderAllChartsTogether();
+
+    } else {
+      $('.btn-toggle').removeClass('active');
+      $(this).addClass('active');
+      activeChartIndx = $(this).index();
+      showChart();
+    }
+
   });
 
   $(document).on('keyup', function(e) {
