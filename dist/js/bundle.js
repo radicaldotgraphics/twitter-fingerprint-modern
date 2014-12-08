@@ -98,7 +98,8 @@ var activeChartIndx = 1,
   canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'],
   models = {},
   charCountHighPoint = null,
-  renderedIndividually = false;
+  renderedIndividually = false,
+  totalTweetCount = 0;
 
 // Convenience cartesian point object
 var Point = function(x, y) {
@@ -169,7 +170,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
       startPoint = new Point(DrawConfig.CENTER_X + minOffset * angleXRad, DrawConfig.CENTER_Y + minOffset * angleYRad),
       endPoint = new Point(DrawConfig.CENTER_X + dist * angleXRad, DrawConfig.CENTER_Y + dist * angleYRad);
 
-    totalAmount += (amount * parseInt(key, 10));
+    totalAmount += (amount * key);
 
     charCountLines.push({
       start: startPoint,
@@ -227,7 +228,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   }
 
   // Add average tweet length to stats object for templating
-  stats.averageTweetLength = Math.ceil(totalAmount / numPoints);
+  stats.averageTweetLength = Math.floor(totalAmount / totalTweetCount);
 
 }
 
@@ -581,6 +582,8 @@ function parseData(data) {
     charCount = {},
     mostUsedChar = {};
 
+  totalTweetCount = data.tweets.length;
+
   $.each(data.tweets, function(i, tweet) {
     var tweetText = tweet.text,
       tweetHour = utils.getHours(tweet.created_at),
@@ -712,6 +715,7 @@ function reset() {
   renderedIndividually = false;
   activeChartIndx = -1;
   stats = {};
+  totalTweetCount = 0;
   $('.btn-toggle').removeClass('active');
 
   $('.chart-inner, .info').css('visibility', 'hidden');
@@ -787,7 +791,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_67309020.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_81071866.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
