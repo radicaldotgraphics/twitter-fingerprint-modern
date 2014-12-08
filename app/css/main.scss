@@ -103,10 +103,10 @@ body {
         background-position: 0 -72px;
       }
       .length {
-        background-position: 0 -36px;
+        background-position: 0 -37px;
       }
       .freq {
-        background-position: 0 -72px;
+        background-position: 0 -24px;
       }
     }
   }
@@ -143,15 +143,16 @@ body {
       background-position: 0 0;
     }
     .time {
-      background-image: url("/img/time-svg.svg");
+      background-image: url("/img/time_stacked.svg");
     }
     .length {
       width: 81px;
       height: 36px;
-      background-image: url("/img/tweet-length-svg.svg");
+      background-image: url("/img/charcount_stacked.svg");
     }
     .freq {
-      background-image: url("/img/time-svg.svg");
+      height: 24px;
+      background-image: url("/img/atoz_stacked.svg");
     }
   }
 }
@@ -344,6 +345,9 @@ footer a {
       .icon {
         width: 60px;
         height: 60px;
+        &.freq {
+          height: 20px;
+        }
       }
       .length {
         width: 68px;
@@ -362,7 +366,7 @@ footer a {
           background-position: 0 -30px;
         }
         .freq {
-          background-position: 0 -60px;
+          background-position: 0 -20px;
         }
       }
     }
