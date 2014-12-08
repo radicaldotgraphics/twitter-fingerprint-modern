@@ -530,6 +530,12 @@ function drawLines(lines, lineWidth, color, ctx) {
   delayedCb();
 }
 
+/**
+ * [drawMarkers description]
+ * @param  {[type]} points [description]
+ * @param  {[type]} ctx    [description]
+ * @return {[type]}        [description]
+ */
 function drawMarkers(points, ctx) {
 
   var delay = 0,
@@ -569,6 +575,17 @@ function drawTrianlgeMarker(point, ctx) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
+}
+
+function showError(mssg) {
+  // Showing error
+  //
+  $('.error-mssg').html(mssg).fadeIn(250);
+
+  setTimeout(function() {
+    $('.error-mssg').fadeOut(250);
+  }, 2250);
+
 }
 
 /**
@@ -705,9 +722,19 @@ function getData() {
   var promise = $.getJSON('/api/timeline?screen_name=' + userName);
   $('.spinner').show();
   promise.then(function(data) {
-    $('.chart-inner, .info').css('visibility', 'visible');
-    $('.spinner').hide();
-    parseData(data);
+
+    if (data.error) {
+      showError('This user does not exist.');
+      return;
+    }
+
+    if (data.tweets && data.tweets.length) {
+      $('.chart-inner, .info').css('visibility', 'visible');
+      $('.spinner').hide();
+      parseData(data);
+    } else {
+      showError('This user has never tweeted!');
+    }
   });
 }
 
@@ -791,7 +818,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b1506067.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_90f51b57.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

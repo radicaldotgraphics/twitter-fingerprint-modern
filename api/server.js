@@ -31,11 +31,14 @@ server.get('/api/timeline', function(req, res, next) {
     twt.getUserTimeline({
       screen_name: req.query.screen_name,
       count: 200 //TODO: Paginate these results to get all 3200
-    }, function() {}, function(data) {
+    }, function(err) {
+      res.json({
+        error: 'user not found'
+      });
+    }, function(data) {
       res.json({
         tweets: JSON.parse(data)
       });
-
     });
   }
 
@@ -50,7 +53,7 @@ server.all('/*', function(req, res) {
   });
 });
 
-server.listen(3000, function(){
+server.listen(3000, function() {
   console.log('Listening on port', process.env.PORT || 3000);
 });
 
@@ -60,3 +63,4 @@ module.exports = {
   livereloadport: livereloadport,
   serverport: serverport
 };
+

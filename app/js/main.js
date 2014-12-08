@@ -474,6 +474,12 @@ function drawLines(lines, lineWidth, color, ctx) {
   delayedCb();
 }
 
+/**
+ * [drawMarkers description]
+ * @param  {[type]} points [description]
+ * @param  {[type]} ctx    [description]
+ * @return {[type]}        [description]
+ */
 function drawMarkers(points, ctx) {
 
   var delay = 0,
@@ -513,6 +519,17 @@ function drawTrianlgeMarker(point, ctx) {
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
+}
+
+function showError(mssg) {
+  // Showing error
+  //
+  $('.error-mssg').html(mssg).fadeIn(250);
+
+  setTimeout(function() {
+    $('.error-mssg').fadeOut(250);
+  }, 2250);
+
 }
 
 /**
@@ -649,9 +666,19 @@ function getData() {
   var promise = $.getJSON('/api/timeline?screen_name=' + userName);
   $('.spinner').show();
   promise.then(function(data) {
-    $('.chart-inner, .info').css('visibility', 'visible');
-    $('.spinner').hide();
-    parseData(data);
+
+    if (data.error) {
+      showError('This user does not exist.');
+      return;
+    }
+
+    if (data.tweets && data.tweets.length) {
+      $('.chart-inner, .info').css('visibility', 'visible');
+      $('.spinner').hide();
+      parseData(data);
+    } else {
+      showError('This user has never tweeted!');
+    }
   });
 }
 

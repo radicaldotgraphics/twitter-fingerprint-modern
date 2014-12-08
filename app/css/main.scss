@@ -32,6 +32,15 @@ body {
   }
 }
 
+.error-mssg {
+  display: none;
+  color: #ef0173;
+  font-size: 0.9em;
+  position: absolute;
+  top: 57px;
+  left: 0;
+}
+
 .spinner {
   position: absolute;
   top: 0;
