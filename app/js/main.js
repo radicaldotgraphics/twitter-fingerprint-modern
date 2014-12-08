@@ -293,7 +293,7 @@ function animateLine(line, lineWidth, color, ctx) {
     easingValue;
 
   function animate() {
-    easingValue = Easing.easeInCirc(iteration, 0, 1, totalIterations);
+    easingValue = Easing.easeInOutQuart(iteration, 0, 1, totalIterations);
 
     ctx.strokeStyle = color || Colors.GREEN;
     ctx.lineWidth = lineWidth || 1;
