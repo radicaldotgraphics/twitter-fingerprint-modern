@@ -32,6 +32,19 @@ body {
   }
 }
 
+.spinner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 580px;
+  left: 0;
+  margin: auto;
+  width: 24px;
+  height: 24px;
+  display: block;
+  opacity: 0.7;
+}
+
 .tweet-count {
   color: #99aab4;
   text-align: center;
