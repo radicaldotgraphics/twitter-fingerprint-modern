@@ -709,8 +709,10 @@ function getData() {
   reset();
 
   var promise = $.getJSON('/api/timeline?screen_name=' + userName);
+  $('.spinner').show();
   promise.then(function(data) {
     $('.chart-inner, .info').css('visibility', 'visible');
+    $('.spinner').hide();
     parseData(data);
   });
 }
@@ -770,7 +772,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_a1e5c5ed.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_99bdc9c2.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

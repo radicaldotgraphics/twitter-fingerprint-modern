@@ -653,8 +653,10 @@ function getData() {
   reset();
 
   var promise = $.getJSON('/api/timeline?screen_name=' + userName);
+  $('.spinner').show();
   promise.then(function(data) {
     $('.chart-inner, .info').css('visibility', 'visible');
+    $('.spinner').hide();
     parseData(data);
   });
 }
