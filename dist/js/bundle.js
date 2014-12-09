@@ -465,7 +465,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       dfd.resolve();
     }
 
-    if(easingValue > 0.8){
+    if (easingValue > 0.85) {
       drawMarkers(markers, mostUsedCtx);
     }
 
@@ -726,7 +726,6 @@ function showChart() {
     $('.stat').eq(activeChartIndx).addClass('active');
     $('#top-layer').addClass('active');
 
-
   }, 350);
 
   isAnimating = true;
@@ -824,7 +823,7 @@ function init() {
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
 
-    if(isAnimating){
+    if (isAnimating) {
       return;
     }
 
@@ -858,7 +857,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ae2d6588.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_8cf5b33b.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

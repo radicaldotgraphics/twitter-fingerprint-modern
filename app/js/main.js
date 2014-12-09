@@ -409,7 +409,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       dfd.resolve();
     }
 
-    if(easingValue > 0.8){
+    if (easingValue > 0.85) {
       drawMarkers(markers, mostUsedCtx);
     }
 
@@ -670,7 +670,6 @@ function showChart() {
     $('.stat').eq(activeChartIndx).addClass('active');
     $('#top-layer').addClass('active');
 
-
   }, 350);
 
   isAnimating = true;
@@ -768,7 +767,7 @@ function init() {
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
 
-    if(isAnimating){
+    if (isAnimating) {
       return;
     }
 
