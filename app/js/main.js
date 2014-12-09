@@ -626,8 +626,6 @@ function parseData(data) {
 
   $('#stats').html(html);
 
-  //console.log(html);
-
 }
 
 function showChart() {
