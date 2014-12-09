@@ -528,7 +528,7 @@ function showError(mssg) {
 
   setTimeout(function() {
     $('.error-mssg').fadeOut(250);
-  }, 2250);
+  }, 4000);
 
 }
 
