@@ -341,6 +341,8 @@ function drawPoly(points, ctx, fillColor) {
 function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
   var chars = utils.getCharacters();
 
+  //console.log('has this boso used % ? ', dataObj['%'], dataObj);
+
   var numPoints = chars.length,
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180,
@@ -562,6 +564,8 @@ function parseData(data) {
     timeOfDay = {},
     charCount = {},
     mostUsedChar = {};
+
+  console.log(data.tweets);
 
   totalTweetCount = data.tweets.length;
 
