@@ -28,11 +28,14 @@ server.get('/api/timeline', function(req, res, next) {
     twt.getUserTimeline({
       screen_name: req.query.screen_name,
       count: 200 //TODO: Paginate these results to get all 3200
-    }, function() {}, function(data) {
+    }, function(err) {
+      res.json({
+        error: 'user not found'
+      });
+    }, function(data) {
       res.json({
         tweets: JSON.parse(data)
       });
-
     });
   }
 
