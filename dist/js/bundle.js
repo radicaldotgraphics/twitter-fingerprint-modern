@@ -283,7 +283,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   // Animation loop function
 
   var iteration = 25,
-    totalIterations = 210,
+    totalIterations = 180,
     easingValue;
 
   function animate() {
@@ -353,7 +353,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 function animateLine(line, lineWidth, color, ctx) {
 
   var iteration = 0,
-    totalIterations = 45,
+    totalIterations = 39,
     easingValue;
 
   function animate() {
@@ -438,7 +438,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   // Animation loop function
   var iteration = 25,
-    totalIterations = 200,
+    totalIterations = 170,
     easingValue;
 
   function animate() {
@@ -460,9 +460,13 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       iteration++;
       requestAnimationFrame(animate);
     } else {
-      drawMarkers(markers, mostUsedCtx);
+
       drawHighPointCirc(highestPoint, ctx);
       dfd.resolve();
+    }
+
+    if(easingValue > 0.8){
+      drawMarkers(markers, mostUsedCtx);
     }
 
   }
@@ -854,7 +858,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_3097e2a1.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_ae2d6588.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

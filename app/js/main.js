@@ -227,7 +227,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   // Animation loop function
 
   var iteration = 25,
-    totalIterations = 210,
+    totalIterations = 180,
     easingValue;
 
   function animate() {
@@ -297,7 +297,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 function animateLine(line, lineWidth, color, ctx) {
 
   var iteration = 0,
-    totalIterations = 45,
+    totalIterations = 39,
     easingValue;
 
   function animate() {
@@ -382,7 +382,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   // Animation loop function
   var iteration = 25,
-    totalIterations = 200,
+    totalIterations = 170,
     easingValue;
 
   function animate() {
@@ -404,9 +404,13 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
       iteration++;
       requestAnimationFrame(animate);
     } else {
-      drawMarkers(markers, mostUsedCtx);
+
       drawHighPointCirc(highestPoint, ctx);
       dfd.resolve();
+    }
+
+    if(easingValue > 0.8){
+      drawMarkers(markers, mostUsedCtx);
     }
 
   }
