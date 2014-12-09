@@ -674,11 +674,12 @@ function getData() {
 
     if (data.tweets && data.tweets.length) {
       $('.chart-inner, .info').css('visibility', 'visible');
-      $('.spinner').hide();
       parseData(data);
     } else {
       showError('This user has never tweeted!');
     }
+
+    $('.spinner').hide();
   });
 }
 
