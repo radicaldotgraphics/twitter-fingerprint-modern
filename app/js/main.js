@@ -565,8 +565,6 @@ function parseData(data) {
     charCount = {},
     mostUsedChar = {};
 
-  console.log(data.tweets);
-
   totalTweetCount = data.tweets.length;
 
   $.each(data.tweets, function(i, tweet) {
@@ -760,14 +758,14 @@ function init() {
 
   if (user.length && locStr.indexOf('@') > 0) {
     userName = user;
-    console.log(user);
+    console.log('@', user);
     $userInput.val(userName);
     getData();
   }
 
   $('.user-submit').on('click', function() {
     userName = $userInput.val();
-    console.log(userName);
+    console.log('@', userName);
     getData();
   });
 

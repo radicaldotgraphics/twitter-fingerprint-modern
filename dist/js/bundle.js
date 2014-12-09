@@ -621,8 +621,6 @@ function parseData(data) {
     charCount = {},
     mostUsedChar = {};
 
-  console.log(data.tweets);
-
   totalTweetCount = data.tweets.length;
 
   $.each(data.tweets, function(i, tweet) {
@@ -816,14 +814,14 @@ function init() {
 
   if (user.length && locStr.indexOf('@') > 0) {
     userName = user;
-    console.log(user);
+    console.log('@', user);
     $userInput.val(userName);
     getData();
   }
 
   $('.user-submit').on('click', function() {
     userName = $userInput.val();
-    console.log(userName);
+    console.log('@', userName);
     getData();
   });
 
@@ -864,7 +862,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_8e673f0e.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_5bc9dcf1.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
