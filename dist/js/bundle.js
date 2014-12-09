@@ -93,6 +93,8 @@ var TextAlign = {
   RIGHT: 'right'
 }
 
+var isAnimating = false;
+
 var activeChartIndx = 1,
   stats = {},
   canvasIds = ['#time-of-day', '#character-counts', '#most-used, #most-used-markers'],
@@ -150,12 +152,11 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
     i = 0,
     mult = utils.getDistMult(dataObj, DrawConfig.RADIUS * 0.5),
     minOffset = 40,
-    charCountLines = [];
-
-  var highestVal = -1,
-    highestPoint = null;
-
-  var totalAmount = 0;
+    charCountLines = [],
+    highestVal = -1,
+    highestPoint = null,
+    totalAmount = 0,
+    dfd = $.Deferred();
 
   // Clear out canvas
   ctx.clearRect(0, 0, DrawConfig.CANVAS_WIDTH, DrawConfig.CANVAS_HEIGHT);
@@ -186,7 +187,7 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   }
 
   // Draw lines extruding from center
-  drawLines(charCountLines, 1, Colors.PINK, ctx);
+  drawLines(charCountLines, 1, Colors.PINK, ctx, dfd);
 
   ctx.font = '8pt HelveticaNeue-Light';
   ctx.fillStyle = Colors.GRAY;
@@ -230,13 +231,16 @@ function renderCharCountChart(ctx, dataObj, renderOutlineMarkers) {
   // Add average tweet length to stats object for templating
   stats.averageTweetLength = Math.floor(totalAmount / totalTweetCount);
 
+  return dfd.promise();
+
 }
 
 function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
   var numPoints = Object.keys(dataObj).length,
     angleIncrement = (360 / numPoints),
     rad = Math.PI / 180,
-    angleOffset = 90 - (360 / numPoints);
+    angleOffset = 90 - (360 / numPoints),
+    dfd = $.Deferred();
 
   var i = 0,
     startX = -1,
@@ -303,6 +307,8 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
       requestAnimationFrame(animate);
     } else {
       drawTrianlgeMarker(highestPoint, ctx);
+
+      dfd.resolve();
     }
 
   }
@@ -341,6 +347,7 @@ function renderTimeOfDayChart(ctx, dataObj, renderOutlines) {
 
   requestAnimationFrame(animate);
 
+  return dfd.promise();
 }
 
 function animateLine(line, lineWidth, color, ctx) {
@@ -392,7 +399,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   var numPoints = chars.length,
     angleIncrement = (360 / numPoints),
-    rad = Math.PI / 180;
+    rad = Math.PI / 180,
+    dfd = $.Deferred();
 
   var markers = [];
 
@@ -454,6 +462,7 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     } else {
       drawMarkers(markers, mostUsedCtx);
       drawHighPointCirc(highestPoint, ctx);
+      dfd.resolve();
     }
 
   }
@@ -491,6 +500,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
   stats.mostUsedCharacter = mostUsedChar + ' (' + highestVal + ' times)';
   requestAnimationFrame(animate);
+
+  return dfd.promise();
 }
 
 function drawTickIndicator(line, lineWidth, ctx) {
@@ -507,7 +518,7 @@ function drawTickIndicator(line, lineWidth, ctx) {
   ctx.closePath();
 }
 
-function drawLines(lines, lineWidth, color, ctx) {
+function drawLines(lines, lineWidth, color, ctx, dfd) {
 
   if (!ctx) {
     throw new Error('Main: drawLines method: must pass a canvas element context 2d');
@@ -523,6 +534,8 @@ function drawLines(lines, lineWidth, color, ctx) {
         delay += 0.1;
         delayedCb();
         i++;
+      } else {
+        dfd.resolve();
       }
     }, delay);
   }
@@ -693,16 +706,26 @@ function showChart() {
   setTimeout(function() {
 
     renderedIndividually = true;
-    renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true);
-    renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true);
-    renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true);
+
+    $.when(renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, true),
+        renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, true),
+        renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, true))
+      .done(
+        function() {
+          //console.log('animation complete?');
+          isAnimating = false;
+        });
 
     $(canvasIds[activeChartIndx]).addClass('active');
     $(canvasIds[activeChartIndx]).addClass('active');
     $('.btn-toggle').eq(activeChartIndx).addClass('active');
     $('.stat').eq(activeChartIndx).addClass('active');
     $('#top-layer').addClass('active');
+
+
   }, 350);
+
+  isAnimating = true;
 
 }
 
@@ -716,6 +739,8 @@ function drawCenterX() {
 
 function getData() {
   reset();
+
+  isAnimating = false;
 
   var promise = $.getJSON('/api/timeline?screen_name=' + userName);
   $('.spinner').show();
@@ -749,15 +774,23 @@ function reset() {
 
 function renderAllChartsTogether() {
   // Render time of day chart to the timeof day canvas element
-  renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false);
-  renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false);
-  renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false);
+
+  $.when(renderCharCountChart(document.getElementById('character-counts').getContext('2d'), models.charCount, false),
+      renderTimeOfDayChart(document.getElementById('time-of-day').getContext('2d'), models.timeOfDay, false),
+      renderMostUsedCharacterChart(document.getElementById('most-used').getContext('2d'), models.mostUsedChar, false))
+    .done(
+      function() {
+        // console.log('animation complete?');
+        isAnimating = false;
+      });
 
   setTimeout(function() {
     $(canvasIds[0]).addClass('active');
     $(canvasIds[1]).addClass('active');
     $(canvasIds[2]).addClass('active');
   }, 250);
+
+  isAnimating = true;
 }
 
 function init() {
@@ -786,6 +819,10 @@ function init() {
 
   // Bind to buttons
   $('.btn-toggle').on('click', function() {
+
+    if(isAnimating){
+      return;
+    }
 
     if ($(this).hasClass('active')) {
       $(this).removeClass('active');
@@ -817,7 +854,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_b68f727d.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_3097e2a1.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';
