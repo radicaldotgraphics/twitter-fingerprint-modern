@@ -475,6 +475,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     ctx.fillStyle = Colors.GRAY;
     ctx.beginPath();
     for (var i = 0; i < chars.length; i++) {
+      var amount = dataObj[chars[i]] || 0;
+
       var circRadius = 235,
         angleStep = (angleIncrement * i - 90),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
@@ -487,11 +489,12 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
       ctx.textAlign = TextAlign.CENTER;
 
-      if (i < 26 || i > 33 && i < 44 || i > 28 && i < 30) {
-        ctx.fillStyle = Colors.WHITE;
-      } else {
+      if (amount === 0) {
         ctx.fillStyle = Colors.GRAY;
+      } else {
+        ctx.fillStyle = Colors.WHITE;
       }
+
       ctx.font = '8pt HelveticaNeue-Light';
       ctx.fillText(chars[i].toUpperCase(), textX, textY);
       ctx.strokeStyle = Colors.GRAY;
@@ -857,7 +860,7 @@ function init() {
 $(init);
 
 
-}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_8cf5b33b.js","/")
+}).call(this,require("Wb8Gej"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {},require("buffer").Buffer,arguments[3],arguments[4],arguments[5],arguments[6],"/fake_d5731335.js","/")
 },{"../js/vendor/handlebars-v2.0.0.js":5,"./chart-option":1,"./utils":3,"./vendor/easing":4,"Wb8Gej":9,"buffer":6,"jquery":10}],3:[function(require,module,exports){
 (function (process,global,Buffer,__argument0,__argument1,__argument2,__argument3,__filename,__dirname){
 'use strict';

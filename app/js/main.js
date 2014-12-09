@@ -419,6 +419,8 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
     ctx.fillStyle = Colors.GRAY;
     ctx.beginPath();
     for (var i = 0; i < chars.length; i++) {
+      var amount = dataObj[chars[i]] || 0;
+
       var circRadius = 235,
         angleStep = (angleIncrement * i - 90),
         xx = DrawConfig.CENTER_X + circRadius * Math.cos(angleStep * rad),
@@ -431,11 +433,12 @@ function renderMostUsedCharacterChart(ctx, dataObj, renderOutlines) {
 
       ctx.textAlign = TextAlign.CENTER;
 
-      if (i < 26 || i > 33 && i < 44 || i > 28 && i < 30) {
-        ctx.fillStyle = Colors.WHITE;
-      } else {
+      if (amount === 0) {
         ctx.fillStyle = Colors.GRAY;
+      } else {
+        ctx.fillStyle = Colors.WHITE;
       }
+
       ctx.font = '8pt HelveticaNeue-Light';
       ctx.fillText(chars[i].toUpperCase(), textX, textY);
       ctx.strokeStyle = Colors.GRAY;
