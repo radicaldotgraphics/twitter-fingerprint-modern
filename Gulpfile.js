@@ -22,20 +22,20 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('html', function() {
-  gulp.src(['app/html/*.html'])
+  return gulp.src(['app/html/*.html'])
     .pipe(jshint())
     .pipe(gulp.dest('dist/'));
 });
 
 // Fonts Task
 gulp.task('copy-fonts', function() {
-  gulp.src('app/fonts/*')
+  return gulp.src('app/fonts/*')
     .pipe(gulp.dest('dist/fonts/'));
 });
 
 // JSHint task
 gulp.task('lint', function() {
-  gulp.src(['app/js/*.js', '!app/js/vendor/*.js', '!app/js/main_old.js'])
+  return gulp.src(['app/js/*.js', '!app/js/vendor/*.js', '!app/js/main_old.js'])
     .pipe(jshint())
     .pipe(jshint.reporter('default'));
 });
@@ -43,27 +43,26 @@ gulp.task('lint', function() {
 // css task
 gulp.task('css', function() {
 
-  gulp.src(['app/css/main.scss', 'app/modules/**/css/**.scss'])
+  return gulp.src(['app/css/main.scss', 'app/modules/**/css/**.scss'])
     // The onerror handler prevents Gulp from crashing when you make a mistake in your SASS
     .pipe(sass({
       sourcemap: true,
       sourcemapPath: '../scss'
     }))
-    .on('error', function(err) {
-      console.log('sass error', err.message);
-    })
     // Optionally add autoprefixer
     .pipe(autoprefixer('last 2 versions', '> 1%', 'ie 9'))
     // These last two should look familiar now :)
     .pipe(concat('main.css'))
+    .on('error', function(err) {
+      console.log('sass error', err.message);
+    })
     .pipe(gulp.dest('dist/css/'));
-
 });
 
 // Browserify task
 gulp.task('browserify', function() {
   // Single point of entry (make sure not to src ALL your files, browserify will figure it out)
-  gulp.src(['app/js/main.js', '!app/js/main_old.js'])
+  return gulp.src(['app/js/main.js', '!app/js/main_old.js'])
     .pipe(browserify({
       insertGlobals: true,
       debug: false
@@ -82,12 +81,14 @@ gulp.task('img', function() {
 
 // Copy Vendor JS that is not included in bundle.js
 gulp.task('vendor-js', function() {
-  gulp.src(['app/js/vendor/*.js'])
+  return gulp.src(['app/js/vendor/*.js'])
     .pipe(gulp.dest('dist/js/vendor/'));
 });
 
 // Dev task
-gulp.task('dev', ['html', 'vendor-js', 'css', 'lint', 'img', 'copy-fonts', 'browserify'], function() {});
+gulp.task('dev', ['html', 'vendor-js', 'css', 'lint', 'img', 'copy-fonts', 'browserify'], function() {
+  process.exit(0);
+});
 
 gulp.task('watch', ['lint'], function() {
   // Start webserver
