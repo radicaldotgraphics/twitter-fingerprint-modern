@@ -49,6 +49,9 @@ gulp.task('css', function() {
       sourcemap: true,
       sourcemapPath: '../scss'
     }))
+    .on('error', function(err) {
+      console.log('sass error', err.message);
+    })
     // Optionally add autoprefixer
     .pipe(autoprefixer('last 2 versions', '> 1%', 'ie 9'))
     // These last two should look familiar now :)
