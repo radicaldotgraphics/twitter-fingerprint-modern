@@ -1,0 +1,477 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    background-color: #27363f;
+    height: 100%;
+    font-family: 'AauxProRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    position: relative;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'AauxProLight', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: white;
+    font-weight: inherit;
+  }
+
+  p, span, li, ol, a, input {
+    font-family: 'AauxProRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: white;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    letter-spacing: 0.4px;
+  }
+
+  a {
+    color: rgb(20, 198, 255);
+  }
+
+  a:active,
+  a:hover,
+  a:visited {
+    color: rgb(223, 44, 139);
+  }
+}
+
+@layer components {
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .chart {
+    position: relative;
+    max-width: 600px;
+    padding-top: 10px;
+    margin: auto;
+    height: 70%;
+    display: block;
+  }
+
+  .chart h1 {
+    max-width: 500px;
+    margin: 20px auto 20px auto;
+  }
+
+  .error-mssg {
+    display: none;
+    color: #ffffff;
+    font-size: 0.9em;
+    position: absolute;
+    top: 57px;
+    left: 0;
+  }
+
+  .spinner-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 526px;
+    left: 0;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+    display: block;
+    opacity: 0.7;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #5c7685;
+    border-top: 2px solid #EC0972;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .tweet-count {
+    color: #99aab4;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 1.0em;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .stat-wrap {
+    width: 100%;
+    min-height: 30px;
+  }
+
+  .stat-wrap .intro {
+    text-align: center;
+    font-size: 1.1em;
+    color: rgba(91, 108, 117, 1);
+  }
+
+  .stat {
+    text-align: center;
+    font-size: 1.3em;
+    color: #EC0972;
+    opacity: 0;
+    display: none;
+  }
+
+  .stat.active {
+    opacity: 1;
+    display: block;
+  }
+
+  .stat span {
+    color: white;
+  }
+
+  .stat span.divider {
+    color: rgba(24, 93, 123, 1);
+  }
+
+  .btn-wrap {
+    margin: 0 auto;
+    max-width: 500px;
+    position: relative;
+    margin-top: 20px;
+    margin-bottom: 60px;
+  }
+
+  .btn-toggle {
+    user-select: none;
+    cursor: pointer;
+    position: relative;
+    width: 114px;
+    max-width: 114px;
+    height: 145px;
+    text-decoration: none;
+    text-transform: uppercase;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.1em;
+    color: #186075;
+    margin-right: 14%;
+    line-height: 1.1em;
+    transition: color 0.15s ease-out;
+  }
+
+  .btn-toggle:hover,
+  .btn-toggle.active {
+    color: white;
+  }
+
+  .btn-toggle:hover .grphx,
+  .btn-toggle.active .grphx {
+    background-color: rgba(30, 43, 51, 1);
+  }
+
+  .btn-toggle:hover .grphx .time,
+  .btn-toggle.active .grphx .time {
+    background-position: 0 -72px;
+  }
+
+  .btn-toggle:hover .grphx .length,
+  .btn-toggle.active .grphx .length {
+    background-position: 0 -37px;
+  }
+
+  .btn-toggle:hover .grphx .freq,
+  .btn-toggle.active .grphx .freq {
+    background-position: 0 -24px;
+  }
+
+  .btn-toggle:last-child {
+    margin-right: 0;
+  }
+
+  .btn-toggle span {
+    line-height: 12px;
+  }
+
+  .grphx {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    background-color: transparent;
+    border-radius: 100%;
+    margin: 0 auto;
+    margin-bottom: 10px;
+    border: 2px solid rgba(54, 71, 81, 1);
+    transition: background-color 0.15s ease-out;
+  }
+
+  .grphx .icon {
+    width: 72px;
+    height: 72px;
+    display: inline-block;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: 100%;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+  }
+
+  .grphx .time {
+    background-image: url("/img/time_stacked.svg");
+  }
+
+  .grphx .length {
+    width: 81px;
+    height: 36px;
+    background-image: url("/img/charcount_stacked.svg");
+  }
+
+  .grphx .freq {
+    height: 24px;
+    background-image: url("/img/atoz_stacked.svg");
+  }
+
+  .chart-inner {
+    position: relative;
+    height: 538px;
+    visibility: hidden;
+    margin-top: 15px;
+  }
+
+  .chart-inner.active {
+    visibility: visible;
+  }
+
+  footer {
+    height: 50px;
+    margin-bottom: 100px;
+    display: block;
+  }
+
+  footer a {
+    float: right;
+    display: inline-block;
+  }
+
+  .input-wrap {
+    position: relative;
+    margin: 0 auto;
+    max-width: 500px;
+  }
+
+  .user-name {
+    width: 455px;
+    height: 50px;
+    background-color: #334956;
+    border: none;
+    outline: none;
+    padding-left: 20px;
+    color: white;
+    font-family: 'AauxProRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 50px;
+  }
+
+  .user-submit {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #ef0173;
+    text-align: center;
+    color: white;
+    padding: 0 15px;
+    user-select: none;
+    cursor: pointer;
+    font-family: 'AauxProRegular', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    border: none;
+  }
+
+  #character-counts,
+  #time-of-day,
+  #most-used,
+  #most-used-markers,
+  #background,
+  #top-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    float: left;
+    margin: 0;
+    padding: 0;
+    width: 600px;
+    height: 538px;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.2s linear;
+  }
+
+  #character-counts.merged,
+  #time-of-day.merged,
+  #most-used.merged,
+  #most-used-markers.merged,
+  #background.merged,
+  #top-layer.merged {
+    position: absolute;
+  }
+
+  #character-counts.active,
+  #time-of-day.active,
+  #most-used.active,
+  #most-used-markers.active,
+  #background.active,
+  #top-layer.active {
+    opacity: 1;
+  }
+
+  #top-layer {
+    z-index: 10;
+  }
+
+  #background {
+    background-color: rgba(39, 54, 63, 1);
+  }
+
+  #character-counts {
+    z-index: 2;
+  }
+
+  #most-used-markers {
+    z-index: 100;
+    display: inline-block;
+    background-color: transparent;
+  }
+
+  #time-of-day {
+    z-index: 1;
+  }
+
+  .info {
+    max-width: 500px;
+    margin: 0 auto;
+    visibility: hidden;
+  }
+
+  .info.active {
+    visibility: visible;
+  }
+
+  .info h2 {
+    font-size: 1.7em;
+  }
+
+  .about {
+    color: #99aab4;
+    line-height: 1.7em;
+    margin-bottom: 50px;
+    max-width: 500px;
+    font-size: 15px;
+  }
+
+  .divider {
+    display: inline-block;
+    margin: 0 10px 0 0;
+  }
+}
+
+@media (max-width: 568px) {
+  .btn-wrap {
+    margin-bottom: 10px;
+  }
+  
+  .btn-toggle {
+    width: 25%;
+    font-size: 1.1em;
+    margin-right: 10%;
+  }
+  
+  .btn-toggle .grphx {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+  }
+  
+  .btn-toggle .grphx .icon {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .btn-toggle .grphx .freq {
+    height: 20px;
+  }
+  
+  .btn-toggle .grphx .length {
+    width: 68px;
+    height: 30px;
+  }
+  
+  .btn-toggle:hover .grphx .time,
+  .btn-toggle.active .grphx .time {
+    background-position: 0 -60px;
+  }
+  
+  .btn-toggle:hover .grphx .length,
+  .btn-toggle.active .grphx .length {
+    width: 68px;
+    height: 30px;
+    background-position: 0 -30px;
+  }
+  
+  .btn-toggle:hover .grphx .freq,
+  .btn-toggle.active .grphx .freq {
+    background-position: 0 -20px;
+  }
+  
+  .stat {
+    font-size: 0.7em;
+  }
+  
+  #character-counts,
+  #time-of-day,
+  #most-used,
+  #most-used-markers,
+  #background,
+  #top-layer {
+    width: 100%;
+    height: auto;
+  }
+  
+  .chart {
+    top: auto;
+    transform: none;
+    max-width: none;
+    padding: 0 20px 0 20px;
+  }
+  
+  .user-submit {
+    right: 0;
+    top: 0;
+  }
+  
+  .user-name {
+    width: 94%;
+  }
+  
+  .chart-inner {
+    height: 0;
+    padding-bottom: 100%;
+  }
+}
