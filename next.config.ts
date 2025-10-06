@@ -1,10 +1,6 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  experimental: {
-    // Suppress hydration warnings for browser extensions
-    suppressHydrationWarning: true,
-  },
   // Optimize for better hydration
   reactStrictMode: true,
   // Handle browser extension modifications
