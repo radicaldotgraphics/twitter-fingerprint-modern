@@ -9,10 +9,10 @@ interface TwitterCompassProps {
   onReset: () => void;
 }
 
-type ChartType = 'time-of-day' | 'length' | 'freq';
+type ChartType = 'time-of-day' | 'length' | 'freq' | 'all';
 
 export default function TwitterCompass({ data }: TwitterCompassProps) {
-  const [activeChart, setActiveChart] = useState<ChartType>('time-of-day');
+  const [activeChart, setActiveChart] = useState<ChartType>('all');
   const [showChart, setShowChart] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -59,17 +59,16 @@ export default function TwitterCompass({ data }: TwitterCompassProps) {
       }
     }
 
-    // Render active chart
-    switch (activeChart) {
-      case 'time-of-day':
-        renderTimeOfDayChart();
-        break;
-      case 'length':
-        renderTweetLengthChart();
-        break;
-      case 'freq':
-        renderCharacterFrequencyChart();
-        break;
+    // Render charts based on active selection
+    // Show all charts layered together for fingerprint effect, or individual charts
+    if (activeChart === 'all' || activeChart === 'time-of-day') {
+      renderTimeOfDayChart();
+    }
+    if (activeChart === 'all' || activeChart === 'length') {
+      renderTweetLengthChart();
+    }
+    if (activeChart === 'all' || activeChart === 'freq') {
+      renderCharacterFrequencyChart();
     }
   };
 
@@ -364,6 +363,19 @@ export default function TwitterCompass({ data }: TwitterCompassProps) {
         </div>
 
         <div className="btn-wrap">
+          <div
+            className={`btn-toggle all ${activeChart === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveChart('all')}
+          >
+            <div className="grphx">
+              <span className="icon all"></span>
+            </div>
+            <span>
+              all
+              <br />
+              charts
+            </span>
+          </div>
           <div
             className={`btn-toggle time ${activeChart === 'time-of-day' ? 'active' : ''}`}
             onClick={() => setActiveChart('time-of-day')}
